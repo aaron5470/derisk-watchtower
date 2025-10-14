@@ -1,0 +1,4 @@
+speckit:
+  language_mode: bilingual
+  translation_style: inline
+  translation_format: "English first, Chinese translation in next line"
