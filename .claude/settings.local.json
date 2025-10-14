@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx hardhat:*)",
+      "Bash(powershell:*)",
+      "Edit",
+      "Read",
+      "Bash",
+      "Write",
+      "WebSearch"
+    ],
+    "deny": [],
+    "ask": [],
+    "defaultMode": "acceptEdits"
+  }
+}
