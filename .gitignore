@@ -137,3 +137,43 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+go.work
+go.work.sum
+
+# Foundry / Solidity
+out/
+cache/
+broadcast/
+*.gas-snapshot
+.certora*/
+crytic-export/
+
+# IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# Backend (Go)
+backend/bin/
+backend/*.log
+
+# Temporary files
+*.tmp
+*.bak

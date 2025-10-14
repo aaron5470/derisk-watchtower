@@ -1,7 +1,7 @@
 # E1 Contracts Tasks（E1 合约任务）
 
-**Feature**: DeRisk Watchtower | **分支**: `001-derisk-watchtower-real`
-**Feature**: DeRisk 瞭望塔 | **Branch**: `001-derisk-watchtower-real`
+**Feature**: DeRisk Watchtower | **分支**: `002-derisk-watchtower-real`
+**Feature**: DeRisk 瞭望塔 | **Branch**: `002-derisk-watchtower-real`
 
 ---
 

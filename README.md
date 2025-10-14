@@ -6,11 +6,16 @@
 - **Why / 为什么：** Reduce liquidation risk with simple, explainable protection flows. / 用直观可解释流程降低被清算风险。
 - **Stack / 技术栈：** web / api / contracts / scripts / configs / core / internal / tests
 - **Start Fresh & AI Attribution / 从零开发与 AI 归因：** See `AI_USAGE.md` + `CHANGELOG.md`.
-- **How to run / 运行方式（示例）：**
+- **How to run / 运行方式：**
   ```bash
-  cd web && npm run dev
-  cd api && go run main.go
-  cd contracts && forge build
+  # Bootstrap project / 引导项目
+  ./scripts/bootstrap.sh
+
+  # Start observability stack / 启动可观测性栈
+  docker-compose up -d
+
+  # Run smoke tests / 运行冒烟测试
+  ./scripts/smoke-test.sh
   ```
 
 **Networks & faucets / 测试网与水龙头：** Base Sepolia（ETH / LINK 水龙头）。
@@ -19,15 +24,13 @@
 
 ```
 derisk-watchtower/
-├── web/           # Frontend React/Next.js application / 前端应用
-├── api/           # Backend API service / 后端 API 服务
-├── contracts/     # Smart contracts (Solidity/Foundry) / 智能合约
-├── scripts/       # Deployment and utility scripts / 部署和工具脚本
-├── configs/       # Configuration files / 配置文件
+├── contracts/     # Smart contracts (Foundry) / 智能合约（Foundry）
+├── subgraph/      # The Graph indexing / The Graph 索引
+├── backend/       # Go API server + WebSocket / Go API 服务器 + WebSocket
+├── frontend/      # Next.js 14 App Router / Next.js 14 App Router
+├── configs/       # Prometheus + Grafana configs / Prometheus + Grafana 配置
 ├── docs/          # Documentation / 文档
-├── core/          # Core business logic / 核心业务逻辑
-├── internal/      # Internal utilities / 内部工具
-├── tests/         # Test suites / 测试套件
+├── scripts/       # Bootstrap and utility scripts / 引导与工具脚本
 ├── AI_USAGE.md    # AI tool attribution / AI 工具归因
 └── CHANGELOG.md   # Development log / 开发日志
 ```
@@ -49,40 +52,32 @@ derisk-watchtower/
 ## Getting Started / 快速开始
 
 ### Prerequisites / 前置要求
-- Node.js 18+ / Node.js 18+
-- Go 1.21+ / Go 1.21+
-- Foundry / Foundry
-- MetaMask or compatible wallet / MetaMask 或兼容钱包
+- Node.js 18+ ([Download](https://nodejs.org/))
+- Go 1.21+ ([Download](https://golang.org/doc/install))
+- Foundry ([Install](https://book.getfoundry.sh/getting-started/installation))
+- Docker & Docker Compose ([Download](https://docs.docker.com/get-docker/))
+- Graph CLI (`npm install -g @graphprotocol/graph-cli`)
 
 ### Installation / 安装
 
-1. **Clone the repository / 克隆仓库**
+1. **Bootstrap the project / 引导项目**
    ```bash
-   git clone <repository-url>
-   cd derisk-watchtower
+   ./scripts/bootstrap.sh
    ```
 
-2. **Setup Frontend / 设置前端**
+2. **Start observability services / 启动可观测性服务**
    ```bash
-   cd web
-   npm install
-   npm run dev
+   docker-compose up -d
    ```
+   - Grafana: http://localhost:3001 (admin/admin)
+   - Prometheus: http://localhost:9090
 
-3. **Setup Backend / 设置后端**
+3. **Start backend server / 启动后端服务器**
    ```bash
-   cd api
-   go mod init derisk-watchtower-api
-   go run main.go
+   cd backend && go run cmd/server/main.go
    ```
-
-4. **Setup Contracts / 设置合约**
-   ```bash
-   cd contracts
-   forge install
-   forge build
-   forge test
-   ```
+   - Health check: http://localhost:8080/healthz
+   - Metrics: http://localhost:8080/metrics
 
 ### Development Workflow / 开发流程
 

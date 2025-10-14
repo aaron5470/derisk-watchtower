@@ -620,38 +620,38 @@ All notable changes to DeRisk Watchtower will be documented here.
 
 ## E0.10 Completion Checklist（完成清单）
 
-- [ ] Branch `001-derisk-watchtower-real` created
-- [ ] 分支 `001-derisk-watchtower-real` 已创建
-- [ ] All toolchain versions verified (Node, Go, Foundry, Docker)
-- [ ] 所有工具链版本已验证（Node、Go、Foundry、Docker）
-- [ ] `.env.example` template created and documented
-- [ ] `.env.example` 模板已创建并记录
+- [X] Branch `001-derisk-watchtower-real` created
+- [X] 分支 `001-derisk-watchtower-real` 已创建
+- [X] All toolchain versions verified (Node, Go, Foundry, Docker)
+- [X] 所有工具链版本已验证（Node、Go、Foundry、Docker）
+- [X] `.env.example` template created and documented
+- [X] `.env.example` 模板已创建并记录
 - [ ] `.env` created from template (not committed)
 - [ ] `.env` 从模板创建（未提交）
-- [ ] `.gitignore` includes `.env` and build artifacts
-- [ ] `.gitignore` 包含 `.env` 与构建产物
-- [ ] Makefile with common targets tested
-- [ ] Makefile 常用目标已测试
-- [ ] `scripts/bootstrap.sh` executable and functional
-- [ ] `scripts/bootstrap.sh` 可执行且功能正常
-- [ ] `scripts/check-env.sh` validates configuration
-- [ ] `scripts/check-env.sh` 验证配置
-- [ ] Docker Compose starts Prometheus + Grafana
-- [ ] Docker Compose 启动 Prometheus + Grafana
-- [ ] Backend `/healthz` endpoint returns 200 OK
-- [ ] 后端 `/healthz` 端点返回 200 OK
-- [ ] Backend `/metrics` endpoint returns Prometheus format
-- [ ] 后端 `/metrics` 端点返回 Prometheus 格式
+- [X] `.gitignore` includes `.env` and build artifacts
+- [X] `.gitignore` 包含 `.env` 与构建产物
+- [X] Makefile with common targets tested
+- [X] Makefile 常用目标已测试
+- [X] `scripts/bootstrap.sh` executable and functional
+- [X] `scripts/bootstrap.sh` 可执行且功能正常
+- [X] `scripts/check-env.sh` validates configuration
+- [X] `scripts/check-env.sh` 验证配置
+- [X] Docker Compose starts Prometheus + Grafana
+- [X] Docker Compose 启动 Prometheus + Grafana
+- [X] Backend `/healthz` endpoint returns 200 OK
+- [X] 后端 `/healthz` 端点返回 200 OK
+- [X] Backend `/metrics` endpoint returns Prometheus format
+- [X] 后端 `/metrics` 端点返回 Prometheus 格式
 - [ ] Prometheus scrapes backend successfully
 - [ ] Prometheus 成功抓取后端
 - [ ] Grafana accessible at http://localhost:3001
 - [ ] Grafana 可在 http://localhost:3001 访问
 - [ ] `scripts/smoke-test.sh` passes all checks
 - [ ] `scripts/smoke-test.sh` 通过所有检查
-- [ ] README.md documents quick start
-- [ ] README.md 记录快速开始
-- [ ] CHANGELOG.md initialized with E0 tasks
-- [ ] CHANGELOG.md 已初始化 E0 任务
+- [X] README.md documents quick start
+- [X] README.md 记录快速开始
+- [X] CHANGELOG.md initialized with E0 tasks
+- [X] CHANGELOG.md 已初始化 E0 任务
 
 ---
 

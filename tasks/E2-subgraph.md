@@ -1,7 +1,7 @@
 # E2 Subgraph Tasks（E2 子图任务）
 
-**Feature**: DeRisk Watchtower | **分支**: `001-derisk-watchtower-real`
-**Feature**: DeRisk 瞭望塔 | **Branch**: `001-derisk-watchtower-real`
+**Feature**: DeRisk Watchtower | **分支**: `003-derisk-watchtower-real`
+**Feature**: DeRisk 瞭望塔 | **Branch**: `003-derisk-watchtower-real`
 
 ---
 
