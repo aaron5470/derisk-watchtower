@@ -49,6 +49,38 @@ derisk-watchtower/
 - **User-Friendly Interface / 用户友好界面:** Intuitive dashboard for position management
 - **Compliance Ready / 合规就绪:** Full documentation and audit trails
 
+## Architecture / 架构
+
+```
+User → Next.js Frontend → Go API → Base Sepolia
+         ↓                ↓
+   WebSocket         Subgraph (The Graph)
+         ↓                ↓
+    Prometheus    ← Chainlink Automation
+         ↓
+      Grafana
+```
+
+**Partner Integrations / 合作伙伴集成:**
+- 🟦 **Base Sepolia** - Layer 2 testnet for smart contract deployment
+- 🔗 **Chainlink Automation** - Automated protection triggers
+- 📊 **The Graph** - Position and event indexing
+
+## Quick Start (One Command) / 快速开始（一键启动）
+
+```bash
+./scripts/bootstrap.sh && docker-compose up -d
+```
+
+**Expected services / 预期服务:**
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3001 (admin/admin)
+- Backend API: http://localhost:8080 (after manual start)
+
+For complete setup instructions, see [Quickstart Guide](specs/001-derisk-watchtower-real/quickstart.md)
+
+完整设置说明见 [快速开始指南](specs/001-derisk-watchtower-real/quickstart.md)
+
 ## Getting Started / 快速开始
 
 ### Prerequisites / 前置要求
@@ -79,6 +111,33 @@ derisk-watchtower/
    - Health check: http://localhost:8080/healthz
    - Metrics: http://localhost:8080/metrics
 
+4. **Start frontend / 启动前端**
+   ```bash
+   cd frontend && npm install && npm run dev
+   ```
+   - Frontend: http://localhost:3000
+   - Offline replay mode: http://localhost:3000?replay=1
+
+### Service URLs / 服务 URL
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| Frontend | http://localhost:3000 | Next.js user interface |
+| Backend API | http://localhost:8080 | Go REST API + WebSocket |
+| Grafana | http://localhost:3001 | Metrics dashboard (admin/admin) |
+| Prometheus | http://localhost:9090 | Metrics collection |
+
+### Offline Demo Mode / 离线演示模式
+
+Access the demo without blockchain connection:
+```
+http://localhost:3000?replay=1
+```
+
+This mode uses pre-recorded fixtures from `docs/fixtures/` for demonstration purposes.
+
+无需区块链连接即可访问演示，使用 `docs/fixtures/` 中的预录数据。
+
 ### Development Workflow / 开发流程
 
 1. **Daily Documentation / 每日文档更新**
@@ -88,15 +147,40 @@ derisk-watchtower/
 
 2. **Testing / 测试**
    ```bash
-   # Run all tests / 运行所有测试
-   cd tests && npm test
-   
+   # Smoke tests / 冒烟测试
+   ./scripts/smoke-test.sh
+
    # Contract tests / 合约测试
    cd contracts && forge test
-   
-   # API tests / API 测试
-   cd api && go test ./...
+
+   # Backend tests / 后端测试
+   cd backend && go test ./...
+
+   # Frontend tests / 前端测试
+   cd frontend && npm test
    ```
+
+3. **Run Self-Check / 运行自检**
+   ```bash
+   ./scripts/self-check.sh
+   ```
+   Validates all required tools and configurations before starting development.
+
+   验证所有必需工具和配置后再开始开发。
+
+## Troubleshooting / 故障排查
+
+**Port conflicts / 端口冲突:**
+- Check if ports 3000, 3001, 8080, or 9090 are already in use
+- Stop conflicting services or change ports in configuration files
+
+**Missing .env file / 缺失 .env 文件:**
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+For more detailed troubleshooting, see [Quickstart Guide](specs/001-derisk-watchtower-real/quickstart.md#troubleshooting)
 
 ## Contributing / 贡献
 

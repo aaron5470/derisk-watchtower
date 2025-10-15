@@ -1218,21 +1218,21 @@ Run self-check before starting development | 开发前运行自检
 
 ## E0.19 Completion Checklist (Part 2)（完成清单第二部分）
 
-- [ ] Pre-commit hooks installed and functional | 预提交钩子已安装且功能正常
-- [ ] Pre-commit config includes Go, Node, Solidity hooks | 预提交配置包含 Go、Node、Solidity 钩子
-- [ ] Contracts CI workflow triggers on push | 合约 CI 工作流在推送时触发
-- [ ] Backend CI workflow includes tests and lint | 后端 CI 工作流包含测试与代码检查
-- [ ] Frontend CI workflow includes E2E tests | 前端 CI 工作流包含 E2E 测试
-- [ ] Quickstart.md aligns with README commands | Quickstart.md 与 README 命令对齐
-- [ ] README has prominent one-command startup | README 有突出一键启动命令
-- [ ] Architecture diagram added to README | 架构图已添加到 README
-- [ ] Grafana dashboard JSON provisioning configured | Grafana 仪表板 JSON 配置已供应
-- [ ] Manual import instructions documented | 手动导入说明已记录
-- [ ] Self-check script validates all dependencies | 自检脚本验证所有依赖
-- [ ] Self-check verifies port availability | 自检验证端口可用性
-- [ ] Self-check integrated into bootstrap flow | 自检集成到引导流程
-- [ ] All scripts in scripts/ are executable | scripts/ 中所有脚本可执行
-- [ ] CHANGELOG.md updated with E0 Part 2 tasks | CHANGELOG.md 已更新 E0 第二部分任务
+- [X] Pre-commit hooks installed and functional | 预提交钩子已安装且功能正常
+- [X] Pre-commit config includes Go, Node, Solidity hooks | 预提交配置包含 Go、Node、Solidity 钩子
+- [X] Contracts CI workflow triggers on push | 合约 CI 工作流在推送时触发
+- [X] Backend CI workflow includes tests and lint | 后端 CI 工作流包含测试与代码检查
+- [X] Frontend CI workflow includes E2E tests | 前端 CI 工作流包含 E2E 测试
+- [X] Quickstart.md aligns with README commands | Quickstart.md 与 README 命令对齐
+- [X] README has prominent one-command startup | README 有突出一键启动命令
+- [X] Architecture diagram added to README | 架构图已添加到 README
+- [X] Grafana dashboard JSON provisioning configured | Grafana 仪表板 JSON 配置已供应
+- [X] Manual import instructions documented | 手动导入说明已记录
+- [X] Self-check script validates all dependencies | 自检脚本验证所有依赖
+- [X] Self-check verifies port availability | 自检验证端口可用性
+- [ ] Self-check integrated into bootstrap flow | 自检集成到引导流程 (Note: bootstrap.sh can call self-check)
+- [X] All scripts in scripts/ are executable | scripts/ 中所有脚本可执行
+- [ ] CHANGELOG.md updated with E0 Part 2 tasks | CHANGELOG.md 已更新 E0 第二部分任务 (to be done)
 
 ---
 

@@ -58,11 +58,11 @@ derisk-watchtower/
 │   ├── schema.graphql
 │   ├── subgraph.yaml
 │   └── src/mapping.ts
-├── api/                # Go backend API
-│   ├── cmd/api/main.go
+├── backend/            # Go backend API
+│   ├── cmd/server/main.go
 │   ├── internal/
 │   └── go.mod
-├── web/                # Next.js frontend
+├── frontend/           # Next.js frontend
 │   ├── app/
 │   ├── components/
 │   ├── lib/
@@ -317,7 +317,7 @@ curl -X POST \
 ### Install Dependencies
 
 ```bash
-cd ../api
+cd ../backend
 go mod download
 ```
 
@@ -325,15 +325,15 @@ go mod download
 
 ```bash
 # Build
-go build -o bin/api cmd/api/main.go
+go build -o bin/server cmd/server/main.go
 
 # Run
-./bin/api
+./bin/server
 ```
 
 **Or run directly**:
 ```bash
-go run cmd/api/main.go
+go run cmd/server/main.go
 ```
 
 Expected output:
@@ -370,13 +370,13 @@ curl http://localhost:8080/api/hf/0x742d35Cc6634C0532925a3b844Bc454e4438f44e
 ### Install Dependencies
 
 ```bash
-cd ../web
+cd ../frontend
 npm install
 ```
 
 ### Configure Environment
 
-Create `web/.env.local`:
+Create `frontend/.env.local`:
 
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:8080
@@ -431,13 +431,9 @@ Navigate to: `http://localhost:3000`
 
 **Manual Override** (if Automation is delayed):
 ```bash
-curl -X POST http://localhost:8080/api/protection/trigger \
-  -H "Content-Type: application/json" \
-  -d '{
-    "positionId": "0x742d35Cc...-1",
-    "actionType": "MANUAL_PROTECT",
-    "amount": "1000000000000000000"
-  }'
+# Use the Foundry script to manually trigger protection
+cd contracts
+forge script script/ManualProtect.s.sol --rpc-url $RPC_URL --broadcast
 ```
 
 ---
@@ -525,18 +521,14 @@ Expected:
 
 ### Option 2: Use Replay Mode
 
-```bash
-# Set environment variable for offline demo
-export REPLAY_MODE=true
-
-# Restart backend
-cd api
-go run cmd/api/main.go
+Navigate to frontend with replay mode:
+```
+http://localhost:3000?replay=1
 ```
 
 **Frontend shows**:
 - "Demo Mode" badge
-- Pre-recorded events from `fixtures/demo-session-1.json`
+- Pre-recorded events from `public/fixtures/` directory
 - Simulated WebSocket notifications
 
 ---
@@ -578,12 +570,12 @@ graph codegen && graph build  # Build
 graph deploy --studio derisk-watchtower  # Deploy
 
 # Backend API
-cd api
-go run cmd/api/main.go        # Run
+cd backend
+go run cmd/server/main.go     # Run
 go test ./...                 # Test
 
 # Frontend
-cd web
+cd frontend
 npm run dev                   # Development server
 npm run build                 # Production build
 npm run lint                  # Lint code

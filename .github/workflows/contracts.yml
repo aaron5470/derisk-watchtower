@@ -1,0 +1,50 @@
+name: Contracts CI
+
+on:
+  push:
+    branches: [main, '001-*']
+    paths:
+      - 'contracts/**'
+      - '.github/workflows/contracts.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'contracts/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run Forge build
+        run: |
+          cd contracts
+          forge --version
+          forge build --sizes
+
+      - name: Run Forge tests
+        run: |
+          cd contracts
+          forge test -vvv
+
+      - name: Run Forge gas snapshot
+        run: |
+          cd contracts
+          forge snapshot
+
+  slither:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: crytic/slither-action@v0.3.0
+        with:
+          target: 'contracts/src/'
+          fail-on: none
+        continue-on-error: true
