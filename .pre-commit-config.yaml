@@ -42,3 +42,17 @@ repos:
       - id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
         exclude: package-lock.json
+
+  # AI Usage compliance check
+  - repo: local
+    hooks:
+      - id: require-ai-usage
+        name: Require AI_USAGE.md when code changes
+        entry: bash scripts/require_ai_usage_simple.sh
+        language: system
+        stages: [commit]
+      - id: require-ai-usage-windows
+        name: Require AI_USAGE.md when code changes (Windows)
+        entry: powershell -ExecutionPolicy Bypass -File scripts/require_ai_usage_simple.ps1
+        language: system
+        stages: [commit]

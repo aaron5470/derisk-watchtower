@@ -1,0 +1,6 @@
+{
+  "name": "ai-usage-plugin",
+  "version": "0.1.0",
+  "description": "Slash commands to append/scan AI_USAGE.md",
+  "author": { "name": "DeRisk Watchtower Team" }
+}

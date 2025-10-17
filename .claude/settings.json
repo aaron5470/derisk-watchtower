@@ -1,0 +1,11 @@
+{
+  "extraKnownMarketplaces": {
+    "derisk-tools": {
+      "source": { 
+        "source": "url", 
+        "url": "file://C:/Users/wk547/Desktop/EthGlobal2025/derisk-watchtower/dev-marketplace/.claude-plugin/marketplace.json" 
+      }
+    }
+  },
+  "enabledPlugins": ["ai-usage-plugin@derisk-tools"]
+}

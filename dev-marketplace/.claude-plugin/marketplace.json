@@ -1,0 +1,11 @@
+{
+  "name": "dev-marketplace",
+  "owner": { "name": "DeRisk Watchtower Team" },
+  "plugins": [
+    {
+      "name": "ai-usage-plugin",
+      "source": "./ai-usage-plugin",
+      "description": "Lightweight AI usage logging helper (slash commands)"
+    }
+  ]
+}
