@@ -19,10 +19,8 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
-      # For Base Sepolia testnet - update with your RPC endpoint
-      ethereum: 'base-sepolia:https://sepolia.base.org'
-      # Alternative: use local Anvil node
-      # ethereum: 'base-sepolia:http://host.docker.internal:8545'
+      # For local Anvil node
+      ethereum: 'mainnet:http://host.docker.internal:8545'
       GRAPH_LOG: info
       GRAPH_ALLOW_NON_DETERMINISTIC_IPFS: 'true'
       ETHEREUM_REORG_THRESHOLD: 1

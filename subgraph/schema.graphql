@@ -4,7 +4,8 @@
 # Position entity - tracks individual DeFi lending positions
 type Position @entity {
   id: ID! # positionId (bytes32)
-  user: Bytes! # address of position owner
+  user: User! # reference to user entity
+  userAddress: Bytes! # address of position owner
   collateralToken: Bytes! # address of collateral token
   collateralAmount: BigInt! # amount of collateral (wei)
   debtToken: Bytes! # address of debt token

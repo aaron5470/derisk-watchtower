@@ -5,23 +5,19 @@
  * protection actions, and risk events from the DeRisk Watchtower contracts.
  */
 
-import { BigInt, Bytes, log, store } from "@graphprotocol/graph-ts";
+import { BigInt, Bytes, log, store, Address } from "@graphprotocol/graph-ts";
 import {
   PositionCreated as PositionCreatedEvent,
   PositionUpdated as PositionUpdatedEvent,
-  HealthFactorUpdated as HealthFactorUpdatedEvent,
-  CollateralAdded as CollateralAddedEvent,
-  DebtRepaid as DebtRepaidEvent,
 } from "../generated/PositionVault/PositionVault";
 import {
   ProtectionExecuted as ProtectionExecutedEvent,
-  ProtectionFailed as ProtectionFailedEvent,
 } from "../generated/Protector/Protector";
 import {
-  Deposited as DepositedEvent,
-  Withdrawn as WithdrawnEvent,
+  EscrowFunded as EscrowFundedEvent,
+  TokensWithdrawn as TokensWithdrawnEvent,
   ProtectorAuthorized as ProtectorAuthorizedEvent,
-  ProtectorUnauthorized as ProtectorUnauthorizedEvent,
+  ProtectorDeauthorized as ProtectorDeauthorizedEvent,
 } from "../generated/DemoEscrow/DemoEscrow";
 import {
   Position,
@@ -215,20 +211,26 @@ function updateGlobalRiskCounts(stats: GlobalStats, oldHF: BigInt, newHF: BigInt
 
 /**
  * Handle PositionCreated event
- * Event signature: PositionCreated(bytes32 indexed positionId, address indexed user,
- *                                   address collateralToken, uint256 collateralAmount,
- *                                   address debtToken, uint256 debtAmount, uint256 healthFactor)
+ * Event signature: PositionCreated(bytes32 indexed id, address indexed owner,
+ *                                   uint256 collateralAmount, uint256 debtAmount)
  */
 export function handlePositionCreated(event: PositionCreatedEvent): void {
-  let positionId = event.params.positionId.toHexString();
+  let positionId = event.params.id.toHexString();
   let position = new Position(positionId);
 
-  position.user = event.params.user;
-  position.collateralToken = event.params.collateralToken;
+  // Default health factor to 1.0 (10000 with 4 decimal precision) since not provided in event
+  let defaultHealthFactor = BigInt.fromI32(10000);
+
+  // Use placeholder addresses for collateral and debt tokens since not provided in event
+  let placeholderToken = Address.zero();
+
+  position.user = event.params.owner.toHexString();
+  position.userAddress = event.params.owner;
+  position.collateralToken = placeholderToken;
   position.collateralAmount = event.params.collateralAmount;
-  position.debtToken = event.params.debtToken;
+  position.debtToken = placeholderToken;
   position.debtAmount = event.params.debtAmount;
-  position.healthFactor = event.params.healthFactor;
+  position.healthFactor = defaultHealthFactor;
   position.createdAt = event.block.timestamp;
   position.createdAtBlock = event.block.number;
   position.lastUpdatedAt = event.block.timestamp;
@@ -236,52 +238,20 @@ export function handlePositionCreated(event: PositionCreatedEvent): void {
   position.isActive = true;
   position.totalProtections = ZERO_BI;
   position.totalCollateralAdded = ZERO_BI;
-  position.lowestHealthFactor = event.params.healthFactor;
-  position.highestHealthFactor = event.params.healthFactor;
+  position.lowestHealthFactor = defaultHealthFactor;
+  position.highestHealthFactor = defaultHealthFactor;
 
   position.save();
 
   // Update User entity
-  let user = getOrCreateUser(event.params.user, event.block.timestamp);
+  let user = getOrCreateUser(event.params.owner, event.block.timestamp);
   user.totalPositions = user.totalPositions.plus(ONE_BI);
   user.activePositions = user.activePositions.plus(ONE_BI);
   user.lastActivityAt = event.block.timestamp;
 
-  // Update user risk counts
-  if (event.params.healthFactor.lt(HF_CRITICAL)) {
-    user.currentCriticalPositions = user.currentCriticalPositions.plus(ONE_BI);
-  } else if (event.params.healthFactor.lt(HF_WARNING)) {
-    user.currentWarningPositions = user.currentWarningPositions.plus(ONE_BI);
-  } else {
-    user.currentSafePositions = user.currentSafePositions.plus(ONE_BI);
-  }
+  // Update user risk counts - start with safe position
+  user.currentSafePositions = user.currentSafePositions.plus(ONE_BI);
   user.save();
-
-  // Update Token entities (placeholder symbols/names - would need token contract calls for real data)
-  let collateralToken = getOrCreateToken(
-    event.params.collateralToken,
-    event.block.timestamp,
-    "TOKEN",
-    "Token",
-    18
-  );
-  collateralToken.totalCollateralVolume = collateralToken.totalCollateralVolume.plus(
-    event.params.collateralAmount
-  );
-  collateralToken.positionCount = collateralToken.positionCount.plus(ONE_BI);
-  collateralToken.lastSeenAt = event.block.timestamp;
-  collateralToken.save();
-
-  let debtToken = getOrCreateToken(
-    event.params.debtToken,
-    event.block.timestamp,
-    "TOKEN",
-    "Token",
-    18
-  );
-  debtToken.totalDebtVolume = debtToken.totalDebtVolume.plus(event.params.debtAmount);
-  debtToken.lastSeenAt = event.block.timestamp;
-  debtToken.save();
 
   // Update GlobalStats
   let stats = getOrCreateGlobalStats();
@@ -292,14 +262,8 @@ export function handlePositionCreated(event: PositionCreatedEvent): void {
   stats.lastUpdatedAt = event.block.timestamp;
   stats.lastUpdatedAtBlock = event.block.number;
 
-  // Update global risk counts
-  if (event.params.healthFactor.lt(HF_CRITICAL)) {
-    stats.criticalPositions = stats.criticalPositions.plus(ONE_BI);
-  } else if (event.params.healthFactor.lt(HF_WARNING)) {
-    stats.warningPositions = stats.warningPositions.plus(ONE_BI);
-  } else {
-    stats.safePositions = stats.safePositions.plus(ONE_BI);
-  }
+  // Start with safe position count
+  stats.safePositions = stats.safePositions.plus(ONE_BI);
   stats.save();
 
   // Update DailyStats
@@ -309,20 +273,21 @@ export function handlePositionCreated(event: PositionCreatedEvent): void {
   dailyStats.debtTaken = dailyStats.debtTaken.plus(event.params.debtAmount);
   dailyStats.save();
 
-  log.info("Position created: {} by user: {} with HF: {}", [
+  log.info("Position created: {} by owner: {} with collateral: {} debt: {}", [
     positionId,
-    event.params.user.toHexString(),
-    event.params.healthFactor.toString(),
+    event.params.owner.toHexString(),
+    event.params.collateralAmount.toString(),
+    event.params.debtAmount.toString(),
   ]);
 }
 
 /**
  * Handle PositionUpdated event
- * Event signature: PositionUpdated(bytes32 indexed positionId, uint256 collateralAmount,
- *                                   uint256 debtAmount, uint256 healthFactor)
+ * Event signature: PositionUpdated(bytes32 indexed id, uint256 newHealthFactor,
+ *                                   uint256 previousHealthFactor, uint256 timestamp)
  */
 export function handlePositionUpdated(event: PositionUpdatedEvent): void {
-  let positionId = event.params.positionId.toHexString();
+  let positionId = event.params.id.toHexString();
   let position = Position.load(positionId);
 
   if (position == null) {
@@ -330,11 +295,10 @@ export function handlePositionUpdated(event: PositionUpdatedEvent): void {
     return;
   }
 
-  let oldHF = position.healthFactor;
-  let newHF = event.params.healthFactor;
+  let oldHF = event.params.previousHealthFactor;
+  let newHF = event.params.newHealthFactor;
 
-  position.collateralAmount = event.params.collateralAmount;
-  position.debtAmount = event.params.debtAmount;
+  // Update health factor (collateralAmount and debtAmount are not provided in this event)
   position.healthFactor = newHF;
   position.lastUpdatedAt = event.block.timestamp;
   position.lastUpdatedAtBlock = event.block.number;
@@ -350,7 +314,7 @@ export function handlePositionUpdated(event: PositionUpdatedEvent): void {
   position.save();
 
   // Update User risk counts
-  let user = User.load(position.user.toHexString());
+  let user = User.load(position.user);
   if (user != null) {
     updateUserRiskCounts(user, oldHF, newHF);
     user.lastActivityAt = event.block.timestamp;
@@ -371,181 +335,6 @@ export function handlePositionUpdated(event: PositionUpdatedEvent): void {
   ]);
 }
 
-/**
- * Handle HealthFactorUpdated event
- * Event signature: HealthFactorUpdated(bytes32 indexed positionId, uint256 oldHF, uint256 newHF)
- */
-export function handleHealthFactorUpdated(event: HealthFactorUpdatedEvent): void {
-  let positionId = event.params.positionId.toHexString();
-  let position = Position.load(positionId);
-
-  if (position == null) {
-    log.warning("Position not found for HF update: {}", [positionId]);
-    return;
-  }
-
-  let oldHF = event.params.oldHF;
-  let newHF = event.params.newHF;
-
-  position.healthFactor = newHF;
-  position.lastUpdatedAt = event.block.timestamp;
-  position.lastUpdatedAtBlock = event.block.number;
-
-  // Update HF extremes
-  if (newHF.lt(position.lowestHealthFactor)) {
-    position.lowestHealthFactor = newHF;
-  }
-  if (newHF.gt(position.highestHealthFactor)) {
-    position.highestHealthFactor = newHF;
-  }
-
-  position.save();
-
-  // Check if this HF change triggers a risk event
-  let oldRiskType = getRiskEventType(oldHF);
-  let newRiskType = getRiskEventType(newHF);
-
-  if (oldRiskType != newRiskType) {
-    // Create RiskEvent
-    let riskEventId =
-      positionId +
-      "-" +
-      event.block.number.toString() +
-      "-" +
-      event.logIndex.toString();
-    let riskEvent = new RiskEvent(riskEventId);
-    riskEvent.position = positionId;
-    riskEvent.eventType = newRiskType;
-    riskEvent.healthFactor = newHF;
-    riskEvent.collateralAmount = position.collateralAmount;
-    riskEvent.debtAmount = position.debtAmount;
-    riskEvent.timestamp = event.block.timestamp;
-    riskEvent.blockNumber = event.block.number;
-    riskEvent.transactionHash = event.transaction.hash;
-    riskEvent.save();
-
-    // Update GlobalStats
-    let stats = getOrCreateGlobalStats();
-    stats.totalRiskEvents = stats.totalRiskEvents.plus(ONE_BI);
-    if (newRiskType == "CRITICAL") {
-      stats.totalCriticalEvents = stats.totalCriticalEvents.plus(ONE_BI);
-    } else if (newRiskType == "WARNING") {
-      stats.totalWarningEvents = stats.totalWarningEvents.plus(ONE_BI);
-    }
-    stats.save();
-
-    // Update DailyStats
-    let dailyStats = getOrCreateDailyStats(event.block.timestamp);
-    dailyStats.riskEventsTriggered = dailyStats.riskEventsTriggered.plus(ONE_BI);
-    dailyStats.save();
-
-    log.info("Risk event: {} changed from {} to {}", [positionId, oldRiskType, newRiskType]);
-  }
-
-  // Update User and Global risk counts
-  let user = User.load(position.user.toHexString());
-  if (user != null) {
-    updateUserRiskCounts(user, oldHF, newHF);
-  }
-
-  let stats = getOrCreateGlobalStats();
-  updateGlobalRiskCounts(stats, oldHF, newHF);
-}
-
-/**
- * Handle CollateralAdded event
- * Event signature: CollateralAdded(bytes32 indexed positionId, uint256 amount, uint256 newHealthFactor)
- */
-export function handleCollateralAdded(event: CollateralAddedEvent): void {
-  let positionId = event.params.positionId.toHexString();
-  let position = Position.load(positionId);
-
-  if (position == null) {
-    log.warning("Position not found for collateral add: {}", [positionId]);
-    return;
-  }
-
-  let oldHF = position.healthFactor;
-  let newHF = event.params.newHealthFactor;
-
-  position.collateralAmount = position.collateralAmount.plus(event.params.amount);
-  position.healthFactor = newHF;
-  position.lastUpdatedAt = event.block.timestamp;
-  position.lastUpdatedAtBlock = event.block.number;
-
-  if (newHF.gt(position.highestHealthFactor)) {
-    position.highestHealthFactor = newHF;
-  }
-
-  position.save();
-
-  // Update User risk counts
-  let user = User.load(position.user.toHexString());
-  if (user != null) {
-    updateUserRiskCounts(user, oldHF, newHF);
-    user.lastActivityAt = event.block.timestamp;
-    user.save();
-  }
-
-  // Update GlobalStats
-  let stats = getOrCreateGlobalStats();
-  updateGlobalRiskCounts(stats, oldHF, newHF);
-  stats.totalCollateralDeposited = stats.totalCollateralDeposited.plus(event.params.amount);
-  stats.save();
-
-  log.info("Collateral added to position: {} amount: {} new HF: {}", [
-    positionId,
-    event.params.amount.toString(),
-    newHF.toString(),
-  ]);
-}
-
-/**
- * Handle DebtRepaid event
- * Event signature: DebtRepaid(bytes32 indexed positionId, uint256 amount, uint256 newHealthFactor)
- */
-export function handleDebtRepaid(event: DebtRepaidEvent): void {
-  let positionId = event.params.positionId.toHexString();
-  let position = Position.load(positionId);
-
-  if (position == null) {
-    log.warning("Position not found for debt repay: {}", [positionId]);
-    return;
-  }
-
-  let oldHF = position.healthFactor;
-  let newHF = event.params.newHealthFactor;
-
-  position.debtAmount = position.debtAmount.minus(event.params.amount);
-  position.healthFactor = newHF;
-  position.lastUpdatedAt = event.block.timestamp;
-  position.lastUpdatedAtBlock = event.block.number;
-
-  if (newHF.gt(position.highestHealthFactor)) {
-    position.highestHealthFactor = newHF;
-  }
-
-  position.save();
-
-  // Update User risk counts
-  let user = User.load(position.user.toHexString());
-  if (user != null) {
-    updateUserRiskCounts(user, oldHF, newHF);
-    user.lastActivityAt = event.block.timestamp;
-    user.save();
-  }
-
-  // Update GlobalStats
-  let stats = getOrCreateGlobalStats();
-  updateGlobalRiskCounts(stats, oldHF, newHF);
-  stats.save();
-
-  log.info("Debt repaid for position: {} amount: {} new HF: {}", [
-    positionId,
-    event.params.amount.toString(),
-    newHF.toString(),
-  ]);
-}
 
 // ============================================================================
 // Protector Event Handlers
@@ -553,8 +342,8 @@ export function handleDebtRepaid(event: DebtRepaidEvent): void {
 
 /**
  * Handle ProtectionExecuted event
- * Event signature: ProtectionExecuted(bytes32 indexed positionId, uint256 collateralAdded,
- *                                      uint256 healthFactorBefore, uint256 healthFactorAfter)
+ * Event signature: ProtectionExecuted(bytes32 indexed positionId, uint256 beforeHF,
+ *                                      uint256 afterHF, uint256 collateralAdded, address indexed executor)
  */
 export function handleProtectionExecuted(event: ProtectionExecutedEvent): void {
   let positionId = event.params.positionId.toHexString();
@@ -572,18 +361,18 @@ export function handleProtectionExecuted(event: ProtectionExecutedEvent): void {
   protection.position = positionId;
   protection.actionType = "AUTOMATED_PROTECTION"; // Could be enhanced to detect type
   protection.collateralAdded = event.params.collateralAdded;
-  protection.healthFactorBefore = event.params.healthFactorBefore;
-  protection.healthFactorAfter = event.params.healthFactorAfter;
-  protection.protector = event.address;
+  protection.healthFactorBefore = event.params.beforeHF;
+  protection.healthFactorAfter = event.params.afterHF;
+  protection.protector = event.params.executor;
   protection.timestamp = event.block.timestamp;
   protection.blockNumber = event.block.number;
   protection.transactionHash = event.transaction.hash;
-  protection.gasUsed = event.transaction.gasUsed;
+  protection.gasUsed = ZERO_BI; // Gas used not available in event
   protection.save();
 
   // Update Position
   let oldHF = position.healthFactor;
-  let newHF = event.params.healthFactorAfter;
+  let newHF = event.params.afterHF;
 
   position.collateralAmount = position.collateralAmount.plus(event.params.collateralAdded);
   position.healthFactor = newHF;
@@ -601,7 +390,7 @@ export function handleProtectionExecuted(event: ProtectionExecutedEvent): void {
   position.save();
 
   // Update User
-  let user = User.load(position.user.toHexString());
+  let user = User.load(position.user);
   if (user != null) {
     user.totalProtectionsReceived = user.totalProtectionsReceived.plus(ONE_BI);
     user.totalCollateralAddedViaProtection = user.totalCollateralAddedViaProtection.plus(
@@ -618,7 +407,7 @@ export function handleProtectionExecuted(event: ProtectionExecutedEvent): void {
   stats.totalCollateralAddedViaProtection = stats.totalCollateralAddedViaProtection.plus(
     event.params.collateralAdded
   );
-  if (newHF.gt(event.params.healthFactorBefore)) {
+  if (newHF.gt(event.params.beforeHF)) {
     stats.successfulProtections = stats.successfulProtections.plus(ONE_BI);
   }
   updateGlobalRiskCounts(stats, oldHF, newHF);
@@ -632,37 +421,15 @@ export function handleProtectionExecuted(event: ProtectionExecutedEvent): void {
   dailyStats.collateralAddedViaProtection = dailyStats.collateralAddedViaProtection.plus(
     event.params.collateralAdded
   );
-  dailyStats.totalGasUsed = dailyStats.totalGasUsed.plus(event.transaction.gasUsed);
-  // Update average gas per protection
-  if (dailyStats.protectionsExecuted.gt(ZERO_BI)) {
-    dailyStats.averageGasPerProtection = dailyStats.totalGasUsed.div(
-      dailyStats.protectionsExecuted
-    );
-  }
+  // Note: Gas tracking removed as event.transaction.gasUsed may not be available
   dailyStats.save();
 
   log.info("Protection executed for position: {} collateral added: {} HF: {} -> {}", [
     positionId,
     event.params.collateralAdded.toString(),
-    event.params.healthFactorBefore.toString(),
-    event.params.healthFactorAfter.toString(),
+    event.params.beforeHF.toString(),
+    event.params.afterHF.toString(),
   ]);
-}
-
-/**
- * Handle ProtectionFailed event
- * Event signature: ProtectionFailed(bytes32 indexed positionId, string reason)
- */
-export function handleProtectionFailed(event: ProtectionFailedEvent): void {
-  let positionId = event.params.positionId.toHexString();
-
-  log.warning("Protection failed for position: {} reason: {}", [
-    positionId,
-    event.params.reason,
-  ]);
-
-  // Could create a ProtectionAction with failed status if schema is extended
-  // For now, just log the failure
 }
 
 // ============================================================================
@@ -670,13 +437,13 @@ export function handleProtectionFailed(event: ProtectionFailedEvent): void {
 // ============================================================================
 
 /**
- * Handle Deposited event
- * Event signature: Deposited(address indexed token, address indexed depositor, uint256 amount)
+ * Handle EscrowFunded event
+ * Event signature: EscrowFunded(address indexed token, uint256 amount, address indexed funder)
  */
-export function handleDeposited(event: DepositedEvent): void {
-  log.info("Escrow deposit: token {} depositor {} amount {}", [
+export function handleEscrowFunded(event: EscrowFundedEvent): void {
+  log.info("Escrow funded: token {} funder {} amount {}", [
     event.params.token.toHexString(),
-    event.params.depositor.toHexString(),
+    event.params.funder.toHexString(),
     event.params.amount.toString(),
   ]);
 
@@ -687,15 +454,15 @@ export function handleDeposited(event: DepositedEvent): void {
 }
 
 /**
- * Handle Withdrawn event
- * Event signature: Withdrawn(address indexed token, address indexed protector, address to, uint256 amount)
+ * Handle TokensWithdrawn event
+ * Event signature: TokensWithdrawn(address indexed token, address indexed to, uint256 amount, address indexed withdrawer)
  */
-export function handleWithdrawn(event: WithdrawnEvent): void {
-  log.info("Escrow withdrawal: token {} protector {} to {} amount {}", [
+export function handleTokensWithdrawn(event: TokensWithdrawnEvent): void {
+  log.info("Escrow withdrawal: token {} to {} amount {} withdrawer {}", [
     event.params.token.toHexString(),
-    event.params.protector.toHexString(),
     event.params.to.toHexString(),
     event.params.amount.toString(),
+    event.params.withdrawer.toHexString(),
   ]);
 }
 
@@ -708,9 +475,9 @@ export function handleProtectorAuthorized(event: ProtectorAuthorizedEvent): void
 }
 
 /**
- * Handle ProtectorUnauthorized event
- * Event signature: ProtectorUnauthorized(address indexed protector)
+ * Handle ProtectorDeauthorized event
+ * Event signature: ProtectorDeauthorized(address indexed protector)
  */
-export function handleProtectorUnauthorized(event: ProtectorUnauthorizedEvent): void {
-  log.info("Protector unauthorized: {}", [event.params.protector.toHexString()]);
+export function handleProtectorDeauthorized(event: ProtectorDeauthorizedEvent): void {
+  log.info("Protector deauthorized: {}", [event.params.protector.toHexString()]);
 }

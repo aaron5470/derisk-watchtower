@@ -6,11 +6,11 @@ dataSources:
   # PositionVault Contract - tracks position lifecycle
   - kind: ethereum/contract
     name: PositionVault
-    network: base-sepolia # Base Sepolia testnet
+    network: mainnet # Local network (Anvil)
     source:
-      address: "0x0000000000000000000000000000000000000000" # PLACEHOLDER - Update after deployment
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
       abi: PositionVault
-      startBlock: 0 # PLACEHOLDER - Update with deployment block number
+      startBlock: 0
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -25,26 +25,20 @@ dataSources:
         - name: PositionVault
           file: ./abis/PositionVault.json
       eventHandlers:
-        - event: PositionCreated(indexed bytes32,indexed address,address,uint256,address,uint256,uint256)
+        - event: PositionCreated(indexed bytes32,indexed address,uint256,uint256)
           handler: handlePositionCreated
         - event: PositionUpdated(indexed bytes32,uint256,uint256,uint256)
           handler: handlePositionUpdated
-        - event: HealthFactorUpdated(indexed bytes32,uint256,uint256)
-          handler: handleHealthFactorUpdated
-        - event: CollateralAdded(indexed bytes32,uint256,uint256)
-          handler: handleCollateralAdded
-        - event: DebtRepaid(indexed bytes32,uint256,uint256)
-          handler: handleDebtRepaid
       file: ./src/mapping.ts
 
   # Protector Contract - tracks protection actions
   - kind: ethereum/contract
     name: Protector
-    network: base-sepolia
+    network: mainnet
     source:
-      address: "0x0000000000000000000000000000000000000000" # PLACEHOLDER - Update after deployment
+      address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
       abi: Protector
-      startBlock: 0 # PLACEHOLDER - Update with deployment block number
+      startBlock: 0
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -61,20 +55,18 @@ dataSources:
         - name: PositionVault
           file: ./abis/PositionVault.json
       eventHandlers:
-        - event: ProtectionExecuted(indexed bytes32,uint256,uint256,uint256)
+        - event: ProtectionExecuted(indexed bytes32,uint256,uint256,uint256,indexed address)
           handler: handleProtectionExecuted
-        - event: ProtectionFailed(indexed bytes32,string)
-          handler: handleProtectionFailed
       file: ./src/mapping.ts
 
   # DemoEscrow Contract - tracks escrow operations
   - kind: ethereum/contract
     name: DemoEscrow
-    network: base-sepolia
+    network: mainnet
     source:
-      address: "0x0000000000000000000000000000000000000000" # PLACEHOLDER - Update after deployment
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
       abi: DemoEscrow
-      startBlock: 0 # PLACEHOLDER - Update with deployment block number
+      startBlock: 0
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -86,14 +78,14 @@ dataSources:
         - name: DemoEscrow
           file: ./abis/DemoEscrow.json
       eventHandlers:
-        - event: Deposited(indexed address,indexed address,uint256)
-          handler: handleDeposited
-        - event: Withdrawn(indexed address,indexed address,address,uint256)
-          handler: handleWithdrawn
+        - event: EscrowFunded(indexed address,uint256,indexed address)
+          handler: handleEscrowFunded
+        - event: TokensWithdrawn(indexed address,indexed address,uint256,indexed address)
+          handler: handleTokensWithdrawn
         - event: ProtectorAuthorized(indexed address)
           handler: handleProtectorAuthorized
-        - event: ProtectorUnauthorized(indexed address)
-          handler: handleProtectorUnauthorized
+        - event: ProtectorDeauthorized(indexed address)
+          handler: handleProtectorDeauthorized
       file: ./src/mapping.ts
 
 # Templates for dynamically added contracts (future feature)
@@ -101,7 +93,7 @@ templates:
   # Template for tracking additional position vaults
   - kind: ethereum/contract
     name: PositionVaultTemplate
-    network: base-sepolia
+    network: mainnet
     source:
       abi: PositionVault
     mapping:
@@ -116,12 +108,10 @@ templates:
         - name: PositionVault
           file: ./abis/PositionVault.json
       eventHandlers:
-        - event: PositionCreated(indexed bytes32,indexed address,address,uint256,address,uint256,uint256)
+        - event: PositionCreated(indexed bytes32,indexed address,uint256,uint256)
           handler: handlePositionCreated
         - event: PositionUpdated(indexed bytes32,uint256,uint256,uint256)
           handler: handlePositionUpdated
-        - event: HealthFactorUpdated(indexed bytes32,uint256,uint256)
-          handler: handleHealthFactorUpdated
       file: ./src/mapping.ts
 
 # Features configuration
