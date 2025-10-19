@@ -47,6 +47,7 @@ dataSources:
         - ProtectionAction
         - Position
         - RiskEvent
+        - AutomationEvent
         - GlobalStats
         - DailyStats
       abis:
@@ -57,6 +58,8 @@ dataSources:
       eventHandlers:
         - event: ProtectionExecuted(indexed bytes32,uint256,uint256,uint256,indexed address)
           handler: handleProtectionExecuted
+        - event: AutomationTriggered(indexed bytes32,uint256,indexed address)
+          handler: handleAutomationTriggered
       file: ./src/mapping.ts
 
   # DemoEscrow Contract - tracks escrow operations

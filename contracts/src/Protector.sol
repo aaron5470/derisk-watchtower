@@ -224,7 +224,7 @@ contract Protector is ReentrancyGuard, IAutomationCompatible {
 
     /// @notice Chainlink Automation: Performs upkeep (protection)
     /// @param performData ABI-encoded position ID to protect
-    function performUpkeep(bytes calldata performData) external override nonReentrant {
+    function performUpkeep(bytes calldata performData) external override {
         bytes32 positionId = abi.decode(performData, (bytes32));
 
         // Fetch position

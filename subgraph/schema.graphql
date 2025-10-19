@@ -20,10 +20,12 @@ type Position @entity {
   # Relationships
   riskEvents: [RiskEvent!]! @derivedFrom(field: "position")
   protectionActions: [ProtectionAction!]! @derivedFrom(field: "position")
+  automationEvents: [AutomationEvent!]! @derivedFrom(field: "position")
 
   # Aggregated stats
   totalProtections: BigInt! # total number of protections executed
   totalCollateralAdded: BigInt! # total collateral added through protections
+  totalAutomationTriggers: BigInt! # total automation triggers for this position
   lowestHealthFactor: BigInt! # lowest HF ever recorded for this position
   highestHealthFactor: BigInt! # highest HF ever recorded for this position
 }
@@ -168,4 +170,18 @@ type Token @entity {
   # Time tracking
   firstSeenAt: BigInt! # first usage timestamp
   lastSeenAt: BigInt! # last usage timestamp
+}
+
+# AutomationEvent entity - tracks Chainlink Automation triggers
+type AutomationEvent @entity {
+  id: ID! # transactionHash-logIndex
+  position: Position! # reference to position that was protected
+  healthFactor: BigInt! # health factor at time of automation trigger
+  keeper: Bytes! # address of Chainlink Automation keeper
+  timestamp: BigInt! # block timestamp
+  blockNumber: BigInt! # block number
+  txHash: Bytes! # transaction hash
+
+  # Relationships
+  protectionAction: ProtectionAction # reference to protection action (if executed)
 }

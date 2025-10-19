@@ -12,6 +12,7 @@ import {
 } from "../generated/PositionVault/PositionVault";
 import {
   ProtectionExecuted as ProtectionExecutedEvent,
+  AutomationTriggered as AutomationTriggeredEvent,
 } from "../generated/Protector/Protector";
 import {
   EscrowFunded as EscrowFundedEvent,
@@ -25,6 +26,7 @@ import {
   Token,
   RiskEvent,
   ProtectionAction,
+  AutomationEvent,
   GlobalStats,
   DailyStats,
 } from "../generated/schema";
@@ -238,6 +240,7 @@ export function handlePositionCreated(event: PositionCreatedEvent): void {
   position.isActive = true;
   position.totalProtections = ZERO_BI;
   position.totalCollateralAdded = ZERO_BI;
+  position.totalAutomationTriggers = ZERO_BI;
   position.lowestHealthFactor = defaultHealthFactor;
   position.highestHealthFactor = defaultHealthFactor;
 
@@ -429,6 +432,60 @@ export function handleProtectionExecuted(event: ProtectionExecutedEvent): void {
     event.params.collateralAdded.toString(),
     event.params.beforeHF.toString(),
     event.params.afterHF.toString(),
+  ]);
+}
+
+/**
+ * Handle AutomationTriggered event
+ * Event signature: AutomationTriggered(bytes32 indexed positionId, uint256 healthFactor, address indexed keeper)
+ *
+ * This event is emitted when Chainlink Automation triggers position protection.
+ * It captures automation-specific data that distinguishes automated protections from manual ones.
+ */
+export function handleAutomationTriggered(event: AutomationTriggeredEvent): void {
+  let positionId = event.params.positionId.toHexString();
+  let position = Position.load(positionId);
+
+  if (position == null) {
+    log.warning("Position not found for automation event: {}", [positionId]);
+    return;
+  }
+
+  // Create AutomationEvent entity
+  let automationEventId =
+    event.transaction.hash.toHexString() + "-" + event.logIndex.toString();
+  let automationEvent = new AutomationEvent(automationEventId);
+
+  automationEvent.position = positionId;
+  automationEvent.healthFactor = event.params.healthFactor;
+  automationEvent.keeper = event.params.keeper;
+  automationEvent.timestamp = event.block.timestamp;
+  automationEvent.blockNumber = event.block.number;
+  automationEvent.txHash = event.transaction.hash;
+  automationEvent.protectionAction = null; // Will be set when ProtectionExecuted event is processed
+
+  automationEvent.save();
+
+  // Update Position automation counter
+  position.totalAutomationTriggers = position.totalAutomationTriggers.plus(ONE_BI);
+  position.lastUpdatedAt = event.block.timestamp;
+  position.lastUpdatedAtBlock = event.block.number;
+  position.save();
+
+  // Update GlobalStats
+  let stats = getOrCreateGlobalStats();
+  stats.lastUpdatedAt = event.block.timestamp;
+  stats.lastUpdatedAtBlock = event.block.number;
+  stats.save();
+
+  // Update DailyStats
+  let dailyStats = getOrCreateDailyStats(event.block.timestamp);
+  dailyStats.save();
+
+  log.info("Automation triggered for position: {} by keeper: {} HF: {}", [
+    positionId,
+    event.params.keeper.toHexString(),
+    event.params.healthFactor.toString(),
   ]);
 }
 

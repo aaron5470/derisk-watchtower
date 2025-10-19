@@ -45,3 +45,95 @@ Example, 2025-10-13: Repository structure commit, web startup, api /health respo
 - 创建 API 健康检查端点 / Create API health check endpoint
 - 初始化智能合约项目 / Initialize smart contract project
 - 配置测试网络连接 / Configure testnet connections
+
+---
+
+## Chainlink Automation Integration / Chainlink 自动化集成
+
+**[中]** DeRisk Watchtower 使用 Chainlink Automation 实现自动化头寸保护，确保在头寸健康因子低于临界阈值时自动触发保护机制。
+
+**[EN]** DeRisk Watchtower uses Chainlink Automation for automated position protection, ensuring protection triggers automatically when position health factors drop below critical thresholds.
+
+### Deployment Information / 部署信息
+
+- **Network / 网络**: Base Sepolia Testnet
+- **Upkeep ID / Upkeep ID**: `[TO BE FILLED AFTER DEPLOYMENT]`
+- **Dashboard / 仪表盘**: `https://automation.chain.link/base-sepolia/[UPKEEP_ID]`
+- **CRON Schedule / CRON 调度**: `0 */5 * * * *` (every 5 minutes / 每 5 分钟)
+- **Trigger Count / 触发次数**: [VIEW ON DASHBOARD / 在仪表盘查看]
+- **Funded with / 资金**: 5 LINK
+
+### Contract Addresses / 合约地址
+
+- **Protector Contract / Protector 合约**: `[TO BE FILLED AFTER DEPLOYMENT]`
+- **PositionVault Contract / PositionVault 合约**: `[TO BE FILLED AFTER DEPLOYMENT]`
+- **DemoEscrow Contract / DemoEscrow 合约**: `[TO BE FILLED AFTER DEPLOYMENT]`
+
+### Key Features / 关键特性
+
+**[中]** 自动化功能：
+- ✅ 自动监控头寸健康因子（每 5 分钟检查一次）
+- ✅ 关键阈值：HF < 1.3 时触发保护
+- ✅ 目标恢复值：HF ≥ 1.5
+- ✅ 手动回退机制：用户可通过 UI 手动触发保护
+- ✅ 事件索引：子图索引所有自动化事件
+- ✅ 监控仪表盘：Grafana 实时监控自动化健康状态
+
+**[EN]** Automation Features:
+- ✅ Automatic position health factor monitoring (checks every 5 minutes)
+- ✅ Critical threshold: Protection triggered when HF < 1.3
+- ✅ Target recovery: HF ≥ 1.5
+- ✅ Manual fallback: Users can manually trigger protection via UI
+- ✅ Event indexing: Subgraph indexes all automation events
+- ✅ Monitoring dashboard: Grafana real-time automation health monitoring
+
+### Testing Evidence / 测试证据
+
+**[中]** 自动化测试通过：
+- ✅ 14/14 单元测试通过 (`ProtectorAutomation.t.sol`)
+- ✅ checkUpkeep 健康/严重头寸测试
+- ✅ performUpkeep 执行保护测试
+- ✅ 事件发射测试
+- ✅ 阈值验证测试
+- ✅ 抵押品计算准确性测试
+
+**[EN]** Automation Tests Passed:
+- ✅ 14/14 unit tests passed (`ProtectorAutomation.t.sol`)
+- ✅ checkUpkeep healthy/critical position tests
+- ✅ performUpkeep protection execution tests
+- ✅ Event emission tests
+- ✅ Threshold validation tests
+- ✅ Collateral calculation accuracy tests
+
+### Documentation / 文档
+
+- **Automation Guide / 自动化指南**: `docs/AUTOMATION.md` (500+ lines)
+- **Frontend Manual / 前端手册**: `docs/FRONTEND_MANUAL_PROTECTION.md` (400+ lines)
+- **Implementation Tasks / 实施任务**: `tasks/E3-automation.md`
+- **Completion Status / 完成状态**: `tasks/E3-completion-status.md` (72.7% complete)
+
+### Live Monitoring / 实时监控
+
+**[中]** 监控端点：
+- **自动化状态**: `GET /api/automation/status`
+- **手动保护**: `POST /api/protection/manual`
+- **子图查询**: GraphQL endpoint with automation queries
+
+**[EN]** Monitoring Endpoints:
+- **Automation Status**: `GET /api/automation/status`
+- **Manual Protection**: `POST /api/protection/manual`
+- **Subgraph Queries**: GraphQL endpoint with automation queries
+
+### Screenshots / 截图
+
+**[中]** 待添加（部署后）：
+- Chainlink Automation 仪表盘截图
+- Upkeep 注册确认
+- 首次自动化触发
+- 子图自动化事件查询结果
+
+**[EN]** To be added (after deployment):
+- Chainlink Automation dashboard screenshot
+- Upkeep registration confirmation
+- First automation trigger
+- Subgraph automation event query results
