@@ -82,3 +82,25 @@
 - 后端自动化监控服务
 - Subgraph automation event indexing
 - 子图自动化事件索引
+
+## 2025-01-19 (D7 - E4 Go API & WebSocket)
+**EN:** Initialize E4 Go API & WebSocket branch for real-time risk monitoring.
+**中文：** 初始化 E4 Go API & WebSocket 分支用于实时风险监控。
+
+### Added / 新增
+- Branch 006-derisk-watchtower-api-ws created from main
+- 从 main 创建分支 006-derisk-watchtower-api-ws
+- Draft PR #3 opened for early CI/CD validation
+- 开启草稿 PR #3 以提前进行 CI/CD 验证
+
+### Planned / 计划中
+- Go backend API with chi router and WebSocket support
+- Go 后端 API 使用 chi 路由器和 WebSocket 支持
+- Real-time risk alert broadcasting via WebSocket
+- 通过 WebSocket 实时风险警报广播
+- Position monitoring service with health factor tracking
+- 头寸监控服务与健康因子跟踪
+- Subgraph client with staleness detection
+- 子图客户端与陈旧度检测
+- Prometheus metrics for API performance monitoring
+- Prometheus 指标用于 API 性能监控
