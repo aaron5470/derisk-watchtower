@@ -1,5 +1,23 @@
 # Changelog (ETHOnline 2025)
 
+## 2025-01-19 (E6 Observability Branch)
+**EN:** Initialize 008-derisk-watchtower-observability branch for monitoring and metrics implementation.
+**中文：** 初始化 008-derisk-watchtower-observability 分支用于监控和指标实现。
+
+### Added / 新增
+- Branch 008-derisk-watchtower-observability created from latest main
+- 从最新 main 分支创建 008-derisk-watchtower-observability 分支
+- Draft PR opened for CI/CD validation and progress tracking
+- 开启草稿 PR 用于 CI/CD 验证和进度跟踪
+- AI_USAGE.md updated with observability branch record
+- AI_USAGE.md 更新包含可观测性分支记录
+
+### Technical Details / 技术细节
+- Branch targets comprehensive observability stack implementation
+- 分支目标是实现全面的可观测性栈
+- Will include Docker Compose, Prometheus, Grafana, and monitoring dashboards
+- 将包含 Docker Compose、Prometheus、Grafana 和监控仪表盘
+
 ## 2025-10-14 (D2)
 **EN:** Complete E0 initialization tasks - environment setup, tooling, observability stack.
 **中文：** 完成 E0 初始化任务 - 环境设置、工具、可观测性栈。
