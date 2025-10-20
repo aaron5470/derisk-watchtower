@@ -1,5 +1,15 @@
 # Changelog (ETHOnline 2025)
 
+## 2025-01-16 (E5 Frontend)
+**EN:** Initialize E5 Frontend development branch with Next.js 14 setup.
+**中文：** 初始化 E5 前端开发分支，配置 Next.js 14。
+
+### Added / 新增
+- 007-derisk-watchtower-frontend branch created from latest main
+- 007-derisk-watchtower-frontend 分支从最新 main 创建
+- Draft PR opened for early CI/CD validation
+- 草稿 PR 已开启用于早期 CI/CD 验证
+
 ## 2025-10-14 (D2)
 **EN:** Complete E0 initialization tasks - environment setup, tooling, observability stack.
 **中文：** 完成 E0 初始化任务 - 环境设置、工具、可观测性栈。
