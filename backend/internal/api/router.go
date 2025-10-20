@@ -1,6 +1,7 @@
 package api
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/derisk-watchtower/backend/internal/api/handlers"
@@ -29,14 +30,23 @@ func NewRouter(cfg *config.Config) *chi.Mux {
 	healthHandler := handlers.NewHealthHandler()
 	positionsHandler := handlers.NewPositionsHandler(subgraph)
 	hfHandler := handlers.NewHFHandler(subgraph)
+	riskEventsHandler := handlers.NewRiskEventsHandler(subgraph)
 	wsHandler := handlers.NewWSHandler(alerter)
 
 	// Routes
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"service":"derisk-watchtower","status":"running","version":"1.0.0"}`))
+	})
+	
 	r.Get("/healthz", healthHandler.HandleHealth)
 	r.Get("/metrics", handlers.HandleMetrics().ServeHTTP)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/positions", positionsHandler.GetPositions)
+		r.Get("/positions/*", positionsHandler.GetPosition)
+		r.Get("/risk-events", riskEventsHandler.GetRiskEvents)
 		r.Get("/hf/{address}", hfHandler.GetHealthFactor)
 	})
 

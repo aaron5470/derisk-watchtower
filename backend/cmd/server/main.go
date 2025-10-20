@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -10,34 +9,33 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/derisk-watchtower/backend/internal/api/handlers"
+	"github.com/derisk-watchtower/backend/internal/api"
+	"github.com/derisk-watchtower/backend/internal/config"
 	"github.com/derisk-watchtower/backend/internal/services"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type HealthResponse struct {
-	Status  string `json:"status"`
-	Version string `json:"version"`
-	Now     int64  `json:"now"`
+func getEnvOrDefault(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }
 
 func main() {
-	// Load configuration from environment
-	rpcURL := os.Getenv("RPC_URL")
-	if rpcURL == "" {
-		rpcURL = "http://localhost:8545" // Default to local node
+	// Load configuration
+	cfg := &config.Config{
+		RPCEndpoint:       getEnvOrDefault("RPC_URL", "http://localhost:8545"),
+		SubgraphEndpoint:  getEnvOrDefault("SUBGRAPH_ENDPOINT", "http://localhost:8000/subgraphs/name/derisk-watchtower"),
+		ProtectorAddress:  os.Getenv("PROTECTOR_ADDRESS"),
 	}
 
-	protectorAddr := os.Getenv("PROTECTOR_ADDRESS")
-	if protectorAddr == "" {
+	if cfg.ProtectorAddress == "" {
 		log.Fatal("PROTECTOR_ADDRESS environment variable is required")
 	}
 
 	// Initialize automation service
-	automationService, err := services.NewAutomationService(rpcURL, common.HexToAddress(protectorAddr))
+	automationService, err := services.NewAutomationService(cfg.RPCEndpoint, common.HexToAddress(cfg.ProtectorAddress))
 	if err != nil {
 		log.Fatalf("Failed to initialize automation service: %v", err)
 	}
@@ -49,34 +47,8 @@ func main() {
 
 	go automationService.StartMonitoring(ctx, 30*time.Second) // Monitor every 30 seconds
 
-	// Initialize handlers
-	automationHandler := handlers.NewAutomationHandler(automationService)
-
-	// Setup router
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
-
-	// Health check endpoint
-	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(HealthResponse{
-			Status:  "ok",
-			Version: "0.1.0",
-			Now:     time.Now().Unix(),
-		})
-	})
-
-	// Prometheus metrics
-	r.Handle("/metrics", promhttp.Handler())
-
-	// API routes
-	r.Route("/api", func(r chi.Router) {
-		r.Route("/automation", func(r chi.Router) {
-			r.Get("/status", automationHandler.GetAutomationStatus)
-		})
-	})
+	// Setup router using our router configuration
+	r := api.NewRouter(cfg)
 
 	port := os.Getenv("API_PORT")
 	if port == "" {
