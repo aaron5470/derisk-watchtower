@@ -8,10 +8,14 @@ services:
       - "9090:9090"
     volumes:
       - ./configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./configs/prometheus/automation-metrics.yml:/etc/prometheus/automation-metrics.yml
+      - ./configs/prometheus/automation-rules.yml:/etc/prometheus/automation-rules.yml
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
     restart: unless-stopped
 
   grafana:
@@ -22,9 +26,12 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_FEATURE_TOGGLES_ENABLE=alerting
     volumes:
       - grafana-data:/var/lib/grafana
       - ./configs/grafana:/etc/grafana/provisioning
+      - ./configs/grafana/automation-monitoring.json:/var/lib/grafana/dashboards/automation-monitoring.json
+      - ./configs/grafana/automation-alerts.json:/var/lib/grafana/dashboards/automation-alerts.json
     depends_on:
       - prometheus
     restart: unless-stopped

@@ -1,9 +1,68 @@
 # E2 Subgraph Tasks（E2 子图任务）
 
-**Feature**: DeRisk Watchtower | **分支**: `003-derisk-watchtower-real`
-**Feature**: DeRisk 瞭望塔 | **Branch**: `003-derisk-watchtower-real`
+**Feature**: DeRisk Watchtower | **分支**: `004-derisk-watchtower-Subgraph`
+**Feature**: DeRisk 瞭望塔 | **Branch**: `004-derisk-watchtower-Subgraph`
 
 ---
+### E2.0.1 Create 004 Branch & Open Draft PR | 创建 004 分支并开启草稿 PR
+
+#### 🎯 任务目标
+从最新主分支创建新的功能分支 `004-derisk-watchtower-subgraph`，  
+推送到远程仓库，并创建 **Draft PR（草稿 PR）** 以触发 CI/CD 测试并追踪开发进度。
+
+---
+
+#### ⚙️ 执行步骤
+```bash
+# 1️⃣ 切换到主分支并更新
+git checkout main
+git pull origin main
+
+# 2️⃣ 创建新分支
+git checkout -b 004-derisk-watchtower-subgraph
+
+# 3️⃣ 推送分支到远程
+git push -u origin 004-derisk-watchtower-subgraph
+
+# 4️⃣ 创建 Draft PR（草稿 PR）
+gh pr create \
+  --base main \
+  --head 004-derisk-watchtower-subgraph \
+  --title "E2 Subgraph — Draft PR (in progress)" \
+  --body "Initialized Subgraph development branch from latest main. Work in progress; CI/CD enabled for early validation." \
+  --draft
+📋 完成标准（AC）
+ 分支已成功创建并推送到远程
+
+ Draft PR 已在 GitHub 显示（目标分支为 main）
+
+ CI/CD 流水线自动触发
+
+ AI_USAGE.md 更新包含本分支记录（mode: assist, verified: true）
+
+ CHANGELOG.md 添加分支初始化日志
+
+🧠 提示
+草稿 PR（Draft）不会被误合并，但可提前触发 CI/CD 测试。
+
+当阶段开发完成后，使用以下命令将其转为正式 PR：
+
+bash
+复制代码
+gh pr ready
+在 PR 前再次同步主分支，确保无冲突：
+
+bash
+复制代码
+git pull origin main
+🪶 输出物
+新分支：004-derisk-watchtower-subgraph
+
+GitHub PR（Draft）链接
+
+CI 流程日志（构建与测试结果）
+
+更新后的 AI_USAGE.md 与 CHANGELOG.md
 
 ## E2.1 Graph CLI Setup（Graph CLI 设置）
 

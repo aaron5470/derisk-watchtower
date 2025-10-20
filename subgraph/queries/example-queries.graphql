@@ -1,0 +1,544 @@
+# DeRisk Watchtower Subgraph - Example Queries
+# These queries demonstrate how to interact with the indexed data
+
+# ============================================================================
+# Position Queries
+# ============================================================================
+
+# Get all positions with pagination
+query GetAllPositions($first: Int!, $skip: Int!) {
+  positions(first: $first, skip: $skip, orderBy: createdAt, orderDirection: desc) {
+    id
+    user
+    collateralToken
+    collateralAmount
+    debtToken
+    debtAmount
+    healthFactor
+    createdAt
+    lastUpdatedAt
+    isActive
+    totalProtections
+    totalCollateralAdded
+    lowestHealthFactor
+    highestHealthFactor
+  }
+}
+
+# Get positions for a specific user
+query GetUserPositions($userAddress: Bytes!) {
+  positions(where: { user: $userAddress }, orderBy: createdAt, orderDirection: desc) {
+    id
+    collateralToken
+    collateralAmount
+    debtToken
+    debtAmount
+    healthFactor
+    createdAt
+    isActive
+    totalProtections
+  }
+}
+
+# Get a specific position by ID
+query GetPosition($positionId: ID!) {
+  position(id: $positionId) {
+    id
+    user
+    collateralToken
+    collateralAmount
+    debtToken
+    debtAmount
+    healthFactor
+    createdAt
+    lastUpdatedAt
+    isActive
+    totalProtections
+    totalCollateralAdded
+    lowestHealthFactor
+    highestHealthFactor
+    riskEvents(orderBy: timestamp, orderDirection: desc) {
+      id
+      eventType
+      healthFactor
+      timestamp
+    }
+    protectionActions(orderBy: timestamp, orderDirection: desc) {
+      id
+      actionType
+      collateralAdded
+      healthFactorBefore
+      healthFactorAfter
+      timestamp
+    }
+  }
+}
+
+# Get critical positions (HF < 1.3)
+query GetCriticalPositions($criticalThreshold: BigInt!) {
+  positions(
+    where: { healthFactor_lt: $criticalThreshold, isActive: true }
+    orderBy: healthFactor
+    orderDirection: asc
+  ) {
+    id
+    user
+    collateralToken
+    collateralAmount
+    debtToken
+    debtAmount
+    healthFactor
+    lastUpdatedAt
+  }
+}
+
+# Get positions in warning range (1.3 <= HF < 1.5)
+query GetWarningPositions($warningMin: BigInt!, $warningMax: BigInt!) {
+  positions(
+    where: {
+      healthFactor_gte: $warningMin
+      healthFactor_lt: $warningMax
+      isActive: true
+    }
+    orderBy: healthFactor
+    orderDirection: asc
+  ) {
+    id
+    user
+    healthFactor
+    collateralAmount
+    debtAmount
+    lastUpdatedAt
+  }
+}
+
+# ============================================================================
+# Risk Event Queries
+# ============================================================================
+
+# Get all risk events
+query GetAllRiskEvents($first: Int!, $skip: Int!) {
+  riskEvents(first: $first, skip: $skip, orderBy: timestamp, orderDirection: desc) {
+    id
+    position {
+      id
+      user
+    }
+    eventType
+    healthFactor
+    collateralAmount
+    debtAmount
+    timestamp
+    blockNumber
+    transactionHash
+  }
+}
+
+# Get risk events for a specific position
+query GetPositionRiskEvents($positionId: ID!) {
+  riskEvents(
+    where: { position: $positionId }
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    id
+    eventType
+    healthFactor
+    collateralAmount
+    debtAmount
+    timestamp
+    transactionHash
+  }
+}
+
+# Get critical risk events only
+query GetCriticalEvents($first: Int!) {
+  riskEvents(
+    first: $first
+    where: { eventType: CRITICAL }
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    id
+    position {
+      id
+      user
+      healthFactor
+    }
+    eventType
+    healthFactor
+    timestamp
+  }
+}
+
+# ============================================================================
+# Protection Action Queries
+# ============================================================================
+
+# Get all protection actions
+query GetAllProtectionActions($first: Int!, $skip: Int!) {
+  protectionActions(first: $first, skip: $skip, orderBy: timestamp, orderDirection: desc) {
+    id
+    position {
+      id
+      user
+    }
+    actionType
+    collateralAdded
+    healthFactorBefore
+    healthFactorAfter
+    protector
+    timestamp
+    blockNumber
+    transactionHash
+    gasUsed
+  }
+}
+
+# Get protection actions for a specific position
+query GetPositionProtectionActions($positionId: ID!) {
+  protectionActions(
+    where: { position: $positionId }
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    id
+    actionType
+    collateralAdded
+    healthFactorBefore
+    healthFactorAfter
+    timestamp
+    gasUsed
+  }
+}
+
+# Get recent successful protections
+query GetRecentProtections($first: Int!) {
+  protectionActions(
+    first: $first
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    id
+    position {
+      id
+      user
+      healthFactor
+    }
+    collateralAdded
+    healthFactorBefore
+    healthFactorAfter
+    timestamp
+    transactionHash
+  }
+}
+
+# ============================================================================
+# User Queries
+# ============================================================================
+
+# Get user details with all positions
+query GetUserDetails($userAddress: ID!) {
+  user(id: $userAddress) {
+    id
+    address
+    totalPositions
+    activePositions
+    totalProtectionsReceived
+    totalCollateralAddedViaProtection
+    currentCriticalPositions
+    currentWarningPositions
+    currentSafePositions
+    firstPositionAt
+    lastActivityAt
+    positions(orderBy: createdAt, orderDirection: desc) {
+      id
+      collateralToken
+      collateralAmount
+      debtToken
+      debtAmount
+      healthFactor
+      isActive
+      totalProtections
+    }
+  }
+}
+
+# Get all users with active positions
+query GetActiveUsers($first: Int!) {
+  users(
+    first: $first
+    where: { activePositions_gt: 0 }
+    orderBy: lastActivityAt
+    orderDirection: desc
+  ) {
+    id
+    address
+    activePositions
+    currentCriticalPositions
+    currentWarningPositions
+    totalProtectionsReceived
+    lastActivityAt
+  }
+}
+
+# Get users with critical positions
+query GetUsersWithCriticalPositions {
+  users(
+    where: { currentCriticalPositions_gt: 0 }
+    orderBy: currentCriticalPositions
+    orderDirection: desc
+  ) {
+    id
+    address
+    currentCriticalPositions
+    currentWarningPositions
+    totalProtectionsReceived
+    lastActivityAt
+  }
+}
+
+# ============================================================================
+# Global Stats Queries
+# ============================================================================
+
+# Get global statistics
+query GetGlobalStats {
+  globalStats(id: "1") {
+    totalPositions
+    activePositions
+    criticalPositions
+    warningPositions
+    safePositions
+    totalProtections
+    totalCollateralAddedViaProtection
+    successfulProtections
+    totalRiskEvents
+    totalCriticalEvents
+    totalWarningEvents
+    totalCollateralDeposited
+    totalDebtTaken
+    lastUpdatedAt
+    lastUpdatedAtBlock
+  }
+}
+
+# ============================================================================
+# Daily Stats Queries
+# ============================================================================
+
+# Get daily statistics for a date range
+query GetDailyStats($startDate: Int!, $endDate: Int!) {
+  dailyStats(
+    where: { date_gte: $startDate, date_lte: $endDate }
+    orderBy: date
+    orderDirection: desc
+  ) {
+    id
+    date
+    newPositions
+    protectionsExecuted
+    riskEventsTriggered
+    collateralDeposited
+    debtTaken
+    collateralAddedViaProtection
+    totalActivePositions
+    criticalPositionsCount
+    warningPositionsCount
+    averageHealthFactor
+    totalGasUsed
+    averageGasPerProtection
+  }
+}
+
+# Get today's stats
+query GetTodayStats($todayTimestamp: Int!) {
+  dailyStats(id: $todayTimestamp) {
+    date
+    newPositions
+    protectionsExecuted
+    riskEventsTriggered
+    collateralDeposited
+    debtTaken
+    collateralAddedViaProtection
+    averageGasPerProtection
+  }
+}
+
+# Get last 7 days statistics
+query GetLast7DaysStats($limit: Int!) {
+  dailyStats(
+    first: $limit
+    orderBy: date
+    orderDirection: desc
+  ) {
+    id
+    date
+    newPositions
+    protectionsExecuted
+    riskEventsTriggered
+    totalActivePositions
+    criticalPositionsCount
+    warningPositionsCount
+    averageHealthFactor
+  }
+}
+
+# ============================================================================
+# Token Queries
+# ============================================================================
+
+# Get all supported tokens
+query GetAllTokens {
+  tokens(orderBy: positionCount, orderDirection: desc) {
+    id
+    address
+    symbol
+    name
+    decimals
+    totalCollateralVolume
+    totalDebtVolume
+    positionCount
+    firstSeenAt
+    lastSeenAt
+  }
+}
+
+# Get token details
+query GetTokenDetails($tokenAddress: ID!) {
+  token(id: $tokenAddress) {
+    id
+    address
+    symbol
+    name
+    decimals
+    totalCollateralVolume
+    totalDebtVolume
+    positionCount
+    firstSeenAt
+    lastSeenAt
+  }
+}
+
+# Get most used collateral tokens
+query GetTopCollateralTokens($first: Int!) {
+  tokens(
+    first: $first
+    orderBy: totalCollateralVolume
+    orderDirection: desc
+  ) {
+    address
+    symbol
+    name
+    totalCollateralVolume
+    positionCount
+  }
+}
+
+# ============================================================================
+# Complex Analytical Queries
+# ============================================================================
+
+# Get positions needing attention (low HF, no recent protection)
+query GetPositionsNeedingAttention($criticalThreshold: BigInt!, $hoursAgo: BigInt!) {
+  positions(
+    where: {
+      healthFactor_lt: $criticalThreshold
+      isActive: true
+      lastUpdatedAt_lt: $hoursAgo
+    }
+    orderBy: healthFactor
+    orderDirection: asc
+  ) {
+    id
+    user
+    healthFactor
+    collateralAmount
+    debtAmount
+    lastUpdatedAt
+    totalProtections
+  }
+}
+
+# Get positions with highest protection count
+query GetMostProtectedPositions($first: Int!) {
+  positions(
+    first: $first
+    where: { totalProtections_gt: 0 }
+    orderBy: totalProtections
+    orderDirection: desc
+  ) {
+    id
+    user
+    healthFactor
+    totalProtections
+    totalCollateralAdded
+    lowestHealthFactor
+    createdAt
+  }
+}
+
+# Get positions with largest health factor improvement
+query GetLargestHFImprovements($first: Int!) {
+  positions(
+    first: $first
+    where: { totalProtections_gt: 0 }
+    orderBy: totalCollateralAdded
+    orderDirection: desc
+  ) {
+    id
+    user
+    healthFactor
+    lowestHealthFactor
+    highestHealthFactor
+    totalCollateralAdded
+    totalProtections
+  }
+}
+
+# Get recent activity timeline (combined view)
+query GetRecentActivity($first: Int!, $since: BigInt!) {
+  riskEvents(
+    first: $first
+    where: { timestamp_gte: $since }
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    id
+    eventType
+    timestamp
+    position {
+      id
+      user
+    }
+  }
+  protectionActions(
+    first: $first
+    where: { timestamp_gte: $since }
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    id
+    actionType
+    timestamp
+    position {
+      id
+      user
+    }
+  }
+}
+
+# Get protection effectiveness statistics
+query GetProtectionEffectiveness {
+  globalStats(id: "1") {
+    totalProtections
+    successfulProtections
+    totalCollateralAddedViaProtection
+  }
+  protectionActions(first: 100, orderBy: timestamp, orderDirection: desc) {
+    healthFactorBefore
+    healthFactorAfter
+    collateralAdded
+    gasUsed
+  }
+}

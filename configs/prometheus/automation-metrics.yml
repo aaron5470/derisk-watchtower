@@ -1,0 +1,63 @@
+# Prometheus configuration for Chainlink Automation metrics
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "automation-rules.yml"
+
+scrape_configs:
+  # Chainlink Automation Upkeep metrics
+  - job_name: 'chainlink-automation'
+    static_configs:
+      - targets: ['localhost:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    params:
+      module: [automation]
+
+  # Backend automation metrics
+  - job_name: 'backend-automation'
+    static_configs:
+      - targets: ['backend:3000']
+    metrics_path: '/api/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Subgraph automation events
+  - job_name: 'subgraph-automation'
+    static_configs:
+      - targets: ['subgraph:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Recording rules for automation metrics
+recording_rules:
+  - name: automation.rules
+    rules:
+      # Automation trigger rate over 5 minutes
+      - record: automation:trigger_rate_5m
+        expr: rate(automation_triggers_total[5m])
+      
+      # Automation success rate
+      - record: automation:success_rate_5m
+        expr: rate(automation_success_total[5m]) / (rate(automation_success_total[5m]) + rate(automation_failure_total[5m]))
+      
+      # Average automation delay
+      - record: automation:delay_avg_5m
+        expr: avg(automation_delay_seconds)
+      
+      # Critical positions detection rate
+      - record: positions:critical_rate_5m
+        expr: rate(position_health_factor_critical_total[5m])
+      
+      # Upkeep performance score
+      - record: automation:upkeep_performance_score
+        expr: (automation:success_rate_5m * 0.6) + ((1 - (automation:delay_avg_5m / 600)) * 0.4)
