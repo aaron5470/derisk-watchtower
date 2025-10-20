@@ -1,0 +1,25 @@
+{
+  "name": "derisk-watchtower-subgraph",
+  "version": "0.1.0",
+  "description": "DeRisk Watchtower subgraph for indexing position management and protection events",
+  "repository": "https://github.com/yourusername/derisk-watchtower",
+  "license": "MIT",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ derisk-watchtower-subgraph",
+    "create-local": "graph create --node http://localhost:8020/ derisk-watchtower",
+    "remove-local": "graph remove --node http://localhost:8020/ derisk-watchtower",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 derisk-watchtower",
+    "test": "graph test",
+    "update-addresses": "node scripts/update-addresses.js",
+    "prepare-abis": "node scripts/prepare-abis.js"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.56.0",
+    "@graphprotocol/graph-ts": "^0.31.0"
+  },
+  "devDependencies": {
+    "matchstick-as": "^0.5.0"
+  }
+}

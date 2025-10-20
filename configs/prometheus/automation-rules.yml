@@ -1,0 +1,128 @@
+# Prometheus alerting rules for Chainlink Automation
+groups:
+  - name: automation.alerts
+    rules:
+      # Critical: Automation system is down
+      - alert: AutomationSystemDown
+        expr: automation_healthy == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: automation
+        annotations:
+          summary: "Chainlink Automation system is unhealthy"
+          description: "The Chainlink Automation system has been unhealthy for more than 1 minute. Upkeep may not be functioning properly."
+          runbook_url: "https://docs.chain.link/chainlink-automation/troubleshooting"
+
+      # Critical: High automation delay
+      - alert: AutomationHighDelay
+        expr: automation_delay_seconds > 600
+        for: 5m
+        labels:
+          severity: critical
+          component: automation
+        annotations:
+          summary: "Automation delay is critically high"
+          description: "Automation delay has been above 10 minutes for more than 5 minutes. Current delay: {{ $value }}s"
+          runbook_url: "https://docs.chain.link/chainlink-automation/troubleshooting#high-delay"
+
+      # Warning: No automation triggers
+      - alert: AutomationNoTriggers
+        expr: increase(automation_triggers_total[1h]) == 0
+        for: 30m
+        labels:
+          severity: warning
+          component: automation
+        annotations:
+          summary: "No automation triggers in the last hour"
+          description: "The automation system has not triggered any upkeep in the last hour. This may indicate a problem with position monitoring."
+
+      # Critical: High failure rate
+      - alert: AutomationHighFailureRate
+        expr: automation:success_rate_5m < 0.8
+        for: 10m
+        labels:
+          severity: critical
+          component: automation
+        annotations:
+          summary: "Automation success rate is below 80%"
+          description: "Automation success rate has been below 80% for more than 10 minutes. Current rate: {{ $value | humanizePercentage }}"
+
+      # Warning: Moderate failure rate
+      - alert: AutomationModerateFailureRate
+        expr: automation:success_rate_5m < 0.95 and automation:success_rate_5m >= 0.8
+        for: 15m
+        labels:
+          severity: warning
+          component: automation
+        annotations:
+          summary: "Automation success rate is below 95%"
+          description: "Automation success rate has been below 95% for more than 15 minutes. Current rate: {{ $value | humanizePercentage }}"
+
+      # Critical: Many critical positions detected
+      - alert: HighCriticalPositions
+        expr: positions:critical_rate_5m > 0.5
+        for: 5m
+        labels:
+          severity: critical
+          component: positions
+        annotations:
+          summary: "High rate of critical positions detected"
+          description: "More than 0.5 critical positions per second detected over the last 5 minutes. Rate: {{ $value }}/sec"
+
+      # Warning: Automation delay increasing
+      - alert: AutomationDelayIncreasing
+        expr: increase(automation_delay_seconds[10m]) > 300
+        for: 5m
+        labels:
+          severity: warning
+          component: automation
+        annotations:
+          summary: "Automation delay is increasing"
+          description: "Automation delay has increased by more than 5 minutes in the last 10 minutes. This may indicate performance issues."
+
+      # Info: Low upkeep performance
+      - alert: LowUpkeepPerformance
+        expr: automation:upkeep_performance_score < 0.7
+        for: 20m
+        labels:
+          severity: info
+          component: automation
+        annotations:
+          summary: "Upkeep performance score is low"
+          description: "The overall upkeep performance score has been below 0.7 for more than 20 minutes. Score: {{ $value | humanize }}"
+
+  - name: automation.infrastructure
+    rules:
+      # Critical: Backend automation service down
+      - alert: BackendAutomationDown
+        expr: up{job="backend-automation"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Backend automation service is down"
+          description: "The backend automation service has been down for more than 2 minutes."
+
+      # Critical: Subgraph automation service down
+      - alert: SubgraphAutomationDown
+        expr: up{job="subgraph-automation"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          component: subgraph
+        annotations:
+          summary: "Subgraph automation service is down"
+          description: "The subgraph automation service has been down for more than 5 minutes."
+
+      # Warning: High memory usage in automation components
+      - alert: AutomationHighMemoryUsage
+        expr: (process_resident_memory_bytes{job=~".*automation.*"} / 1024 / 1024) > 512
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High memory usage in automation component"
+          description: "Memory usage in {{ $labels.job }} is above 512MB. Current usage: {{ $value }}MB"
