@@ -1,0 +1,124 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+
+dataSources:
+  # PositionVault Contract - tracks position lifecycle
+  - kind: ethereum/contract
+    name: PositionVault
+    network: mainnet # Local network (Anvil)
+    source:
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      abi: PositionVault
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Position
+        - User
+        - Token
+        - GlobalStats
+        - DailyStats
+      abis:
+        - name: PositionVault
+          file: ./abis/PositionVault.json
+      eventHandlers:
+        - event: PositionCreated(indexed bytes32,indexed address,uint256,uint256)
+          handler: handlePositionCreated
+        - event: PositionUpdated(indexed bytes32,uint256,uint256,uint256)
+          handler: handlePositionUpdated
+      file: ./src/mapping.ts
+
+  # Protector Contract - tracks protection actions
+  - kind: ethereum/contract
+    name: Protector
+    network: mainnet
+    source:
+      address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+      abi: Protector
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ProtectionAction
+        - Position
+        - RiskEvent
+        - AutomationEvent
+        - GlobalStats
+        - DailyStats
+      abis:
+        - name: Protector
+          file: ./abis/Protector.json
+        - name: PositionVault
+          file: ./abis/PositionVault.json
+      eventHandlers:
+        - event: ProtectionExecuted(indexed bytes32,uint256,uint256,uint256,indexed address)
+          handler: handleProtectionExecuted
+        - event: AutomationTriggered(indexed bytes32,uint256,indexed address)
+          handler: handleAutomationTriggered
+      file: ./src/mapping.ts
+
+  # DemoEscrow Contract - tracks escrow operations
+  - kind: ethereum/contract
+    name: DemoEscrow
+    network: mainnet
+    source:
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      abi: DemoEscrow
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ProtectionAction
+        - GlobalStats
+      abis:
+        - name: DemoEscrow
+          file: ./abis/DemoEscrow.json
+      eventHandlers:
+        - event: EscrowFunded(indexed address,uint256,indexed address)
+          handler: handleEscrowFunded
+        - event: TokensWithdrawn(indexed address,indexed address,uint256,indexed address)
+          handler: handleTokensWithdrawn
+        - event: ProtectorAuthorized(indexed address)
+          handler: handleProtectorAuthorized
+        - event: ProtectorDeauthorized(indexed address)
+          handler: handleProtectorDeauthorized
+      file: ./src/mapping.ts
+
+# Templates for dynamically added contracts (future feature)
+templates:
+  # Template for tracking additional position vaults
+  - kind: ethereum/contract
+    name: PositionVaultTemplate
+    network: mainnet
+    source:
+      abi: PositionVault
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Position
+        - User
+        - GlobalStats
+      abis:
+        - name: PositionVault
+          file: ./abis/PositionVault.json
+      eventHandlers:
+        - event: PositionCreated(indexed bytes32,indexed address,uint256,uint256)
+          handler: handlePositionCreated
+        - event: PositionUpdated(indexed bytes32,uint256,uint256,uint256)
+          handler: handlePositionUpdated
+      file: ./src/mapping.ts
+
+# Features configuration
+features:
+  - grafting # Enable grafting for subgraph upgrades
+  - nonFatalErrors # Continue indexing on non-fatal errors
+  - ipfsOnEthereumContracts # Support IPFS contract metadata

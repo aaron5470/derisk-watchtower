@@ -1,0 +1,33 @@
+{
+  "network": "anvil-local",
+  "chainId": 31337,
+  "rpcUrl": "http://localhost:8545",
+  "deploymentTimestamp": "2025-01-18T12:00:00Z",
+  "contracts": {
+    "PositionVault": {
+      "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+      "description": "Main vault contract for managing positions"
+    },
+    "DemoEscrow": {
+      "address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+      "description": "Escrow contract for managing collateral and debt"
+    },
+    "MockPriceFeedCollateral": {
+      "address": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+      "description": "Mock price feed for collateral asset"
+    },
+    "MockPriceFeedDebt": {
+      "address": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+      "description": "Mock price feed for debt asset"
+    },
+    "Protector": {
+      "address": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
+      "description": "Protector contract for automated liquidation protection"
+    }
+  },
+  "configuration": {
+    "protectorAuthorized": true,
+    "initialCollateralPrice": "2000000000",
+    "initialDebtPrice": "1000000000"
+  }
+}

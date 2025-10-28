@@ -81,6 +81,94 @@ For complete setup instructions, see [Quickstart Guide](specs/001-derisk-watchto
 
 完整设置说明见 [快速开始指南](specs/001-derisk-watchtower-real/quickstart.md)
 
+## Chainlink Automation / Chainlink 自动化
+
+**[EN]** DeRisk Watchtower uses Chainlink Automation to automatically protect positions at risk. The system monitors position health factors every 5 minutes and triggers protection when needed.
+
+**[中]** DeRisk Watchtower 使用 Chainlink Automation 自动保护风险头寸。系统每 5 分钟监控一次头寸健康因子，并在需要时触发保护。
+
+### Key Features / 关键特性
+
+- **Automatic Protection / 自动保护**: Triggered every 5 minutes via CRON schedule
+- **Critical Threshold / 临界阈值**: Protection activates when HF < 1.3
+- **Target Recovery / 目标恢复**: Restores health factor to HF ≥ 1.5
+- **Manual Fallback / 手动回退**: Users can manually trigger protection via UI
+- **Event Indexing / 事件索引**: All automation events indexed by The Graph subgraph
+- **Monitoring / 监控**: Real-time automation health at `/api/automation/status`
+
+### How It Works / 工作原理
+
+1. **checkUpkeep**: Chainlink Automation calls `checkUpkeep()` every 5 minutes
+   - Checks if any monitored position has HF < 1.3
+   - Returns position ID if protection needed
+
+2. **performUpkeep**: If upkeep needed, Chainlink calls `performUpkeep()`
+   - Calculates collateral amount needed to restore HF to 1.5
+   - Transfers collateral from escrow to position
+   - Emits `AutomationTriggered` event
+
+3. **Manual Fallback**: If automation is delayed
+   - Users can trigger protection via frontend button
+   - Backend API endpoint: `POST /api/protection/manual`
+   - Same protection logic as automated flow
+
+### Documentation / 文档
+
+- **Full Guide / 完整指南**: [docs/AUTOMATION.md](docs/AUTOMATION.md) (500+ lines)
+- **Frontend Manual / 前端手册**: [docs/FRONTEND_MANUAL_PROTECTION.md](docs/FRONTEND_MANUAL_PROTECTION.md)
+- **Deployment Proof / 部署证明**: [docs/PROOF.md](docs/PROOF.md#chainlink-automation-integration)
+
+### Testing / 测试
+
+All automation features are thoroughly tested:
+- ✅ 14/14 unit tests passed (`contracts/test/ProtectorAutomation.t.sol`)
+- ✅ checkUpkeep validation for healthy and critical positions
+- ✅ performUpkeep execution and event emission
+- ✅ Collateral calculation accuracy
+- ✅ Edge case handling (reentrancy, insufficient balance, etc.)
+
+Run automation tests:
+```bash
+cd contracts
+forge test --match-contract ProtectorAutomationTest -vv
+```
+
+---
+
+## Observability / 可观测性
+
+DeRisk Watchtower includes a complete observability stack with Prometheus and Grafana.
+
+### Quick Start / 快速开始
+
+```bash
+./scripts/start-observability.sh
+```
+
+Or on Windows / 或在 Windows 上:
+```powershell
+.\scripts\start-observability.ps1
+```
+
+### Access / 访问
+
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3001 (admin/admin)
+
+### Metrics / 指标
+
+- `risk_event_trigger_total` - Total risk events / 总风险事件
+- `protect_success_total` - Successful protections / 成功保护次数
+- `protect_failure_total` - Failed protections / 失败保护次数
+- `alert_latency_seconds` - Alert latency histogram / 告警延迟直方图
+- `positions_monitored` - Active position count / 活跃仓位数量
+
+See [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md) for detailed documentation.
+
+详细文档见 [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md)。
+
+---
+
 ## Getting Started / 快速开始
 
 ### Prerequisites / 前置要求

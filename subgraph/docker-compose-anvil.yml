@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:nightly
+    container_name: anvil-local
+    command: anvil --host 0.0.0.0 --port 8545 --chain-id 31337 --accounts 10 --balance 10000
+    ports:
+      - "8545:8545"
+    networks:
+      - subgraph-network
+    restart: unless-stopped
+    environment:
+      - ANVIL_HOST=0.0.0.0
+      - ANVIL_PORT=8545
+
+networks:
+  subgraph-network:
+    external: true
