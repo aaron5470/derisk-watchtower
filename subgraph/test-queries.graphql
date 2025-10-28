@@ -1,0 +1,386 @@
+# DeRisk Watchtower Subgraph - Test Queries
+# Collection of example GraphQL queries for testing and development
+
+# ============================================================================
+# Automation Event Queries
+# ============================================================================
+
+# Query: Get recent automation events
+# [中] 查询最近的自动化事件
+# [EN] Query recent automation events
+query AutomationHistory {
+  automationEvents(first: 20, orderBy: timestamp, orderDirection: desc) {
+    id
+    position {
+      id
+      owner
+      userAddress
+      healthFactor
+    }
+    healthFactor
+    keeper
+    timestamp
+    blockNumber
+    txHash
+    protectionAction {
+      id
+      collateralAdded
+      healthFactorBefore
+      healthFactorAfter
+    }
+  }
+}
+
+# Query: Get automation events for a specific position
+# [中] 查询特定头寸的自动化事件
+# [EN] Query automation events for specific position
+query PositionAutomationHistory($positionId: ID!) {
+  position(id: $positionId) {
+    id
+    userAddress
+    healthFactor
+    totalAutomationTriggers
+    automationEvents(orderBy: timestamp, orderDirection: desc) {
+      id
+      healthFactor
+      keeper
+      timestamp
+      blockNumber
+      protectionAction {
+        id
+        collateralAdded
+        healthFactorAfter
+      }
+    }
+  }
+}
+
+# Query: Get automation events by keeper address
+# [中] 按 keeper 地址查询自动化事件
+# [EN] Query automation events by keeper address
+query AutomationEventsByKeeper($keeper: Bytes!) {
+  automationEvents(where: { keeper: $keeper }, orderBy: timestamp, orderDirection: desc) {
+    id
+    position {
+      id
+      userAddress
+      healthFactor
+    }
+    healthFactor
+    timestamp
+    blockNumber
+  }
+}
+
+# Query: Get positions with automation history
+# [中] 获取有自动化历史的头寸
+# [EN] Get positions with automation history
+query PositionsWithAutomation {
+  positions(where: { totalAutomationTriggers_gt: 0 }, orderBy: totalAutomationTriggers, orderDirection: desc) {
+    id
+    userAddress
+    healthFactor
+    totalAutomationTriggers
+    totalProtections
+    automationEvents(first: 5, orderBy: timestamp, orderDirection: desc) {
+      id
+      timestamp
+      healthFactor
+      keeper
+    }
+  }
+}
+
+# ============================================================================
+# Position Queries
+# ============================================================================
+
+# Query: Get all positions with details
+# [中] 获取所有头寸及详情
+# [EN] Get all positions with details
+query AllPositions {
+  positions(first: 100, orderBy: createdAt, orderDirection: desc) {
+    id
+    userAddress
+    collateralAmount
+    debtAmount
+    healthFactor
+    isActive
+    totalProtections
+    totalAutomationTriggers
+    createdAt
+    lastUpdatedAt
+  }
+}
+
+# Query: Get critical positions (HF < 1.3)
+# [中] 获取严重头寸 (HF < 1.3)
+# [EN] Get critical positions (HF < 1.3)
+query CriticalPositions {
+  positions(where: { healthFactor_lt: 13000, isActive: true }, orderBy: healthFactor) {
+    id
+    userAddress
+    collateralAmount
+    debtAmount
+    healthFactor
+    totalProtections
+    lastUpdatedAt
+  }
+}
+
+# Query: Get position details with all events
+# [中] 获取头寸详情及所有事件
+# [EN] Get position details with all events
+query PositionDetails($id: ID!) {
+  position(id: $id) {
+    id
+    userAddress
+    collateralToken
+    collateralAmount
+    debtToken
+    debtAmount
+    healthFactor
+    createdAt
+    lastUpdatedAt
+    isActive
+    totalProtections
+    totalCollateralAdded
+    totalAutomationTriggers
+    lowestHealthFactor
+    highestHealthFactor
+
+    riskEvents(orderBy: timestamp, orderDirection: desc) {
+      id
+      eventType
+      healthFactor
+      timestamp
+    }
+
+    protectionActions(orderBy: timestamp, orderDirection: desc) {
+      id
+      actionType
+      collateralAdded
+      healthFactorBefore
+      healthFactorAfter
+      timestamp
+    }
+
+    automationEvents(orderBy: timestamp, orderDirection: desc) {
+      id
+      healthFactor
+      keeper
+      timestamp
+    }
+  }
+}
+
+# ============================================================================
+# Protection Action Queries
+# ============================================================================
+
+# Query: Get recent protection actions
+# [中] 获取最近的保护操作
+# [EN] Get recent protection actions
+query RecentProtections {
+  protectionActions(first: 20, orderBy: timestamp, orderDirection: desc) {
+    id
+    position {
+      id
+      userAddress
+    }
+    actionType
+    collateralAdded
+    healthFactorBefore
+    healthFactorAfter
+    timestamp
+    blockNumber
+    transactionHash
+  }
+}
+
+# Query: Get automated protections only
+# [中] 仅获取自动化保护
+# [EN] Get automated protections only
+query AutomatedProtections {
+  protectionActions(where: { actionType: AUTOMATED_PROTECTION }, first: 50, orderBy: timestamp, orderDirection: desc) {
+    id
+    position {
+      id
+      userAddress
+      healthFactor
+    }
+    collateralAdded
+    healthFactorBefore
+    healthFactorAfter
+    timestamp
+  }
+}
+
+# ============================================================================
+# Global Statistics Queries
+# ============================================================================
+
+# Query: Get global statistics
+# [中] 获取全局统计
+# [EN] Get global statistics
+query GlobalStatistics {
+  globalStats(id: "1") {
+    totalPositions
+    activePositions
+    criticalPositions
+    warningPositions
+    safePositions
+    totalProtections
+    totalCollateralAddedViaProtection
+    successfulProtections
+    totalRiskEvents
+    totalCriticalEvents
+    totalWarningEvents
+    totalCollateralDeposited
+    totalDebtTaken
+    lastUpdatedAt
+  }
+}
+
+# ============================================================================
+# User Queries
+# ============================================================================
+
+# Query: Get user details with positions
+# [中] 获取用户详情及头寸
+# [EN] Get user details with positions
+query UserDetails($address: ID!) {
+  user(id: $address) {
+    id
+    address
+    totalPositions
+    activePositions
+    totalProtectionsReceived
+    totalCollateralAddedViaProtection
+    currentCriticalPositions
+    currentWarningPositions
+    currentSafePositions
+    firstPositionAt
+    lastActivityAt
+
+    positions(orderBy: createdAt, orderDirection: desc) {
+      id
+      collateralAmount
+      debtAmount
+      healthFactor
+      isActive
+      totalProtections
+      totalAutomationTriggers
+      createdAt
+      lastUpdatedAt
+    }
+  }
+}
+
+# ============================================================================
+# Daily Statistics Queries
+# ============================================================================
+
+# Query: Get daily statistics for time-series analysis
+# [中] 获取每日统计用于时间序列分析
+# [EN] Get daily statistics for time-series analysis
+query DailyStatistics($limit: Int = 30) {
+  dailyStats(first: $limit, orderBy: date, orderDirection: desc) {
+    id
+    date
+    newPositions
+    protectionsExecuted
+    riskEventsTriggered
+    collateralDeposited
+    debtTaken
+    collateralAddedViaProtection
+    totalActivePositions
+    criticalPositionsCount
+    warningPositionsCount
+    averageHealthFactor
+    totalGasUsed
+    averageGasPerProtection
+  }
+}
+
+# ============================================================================
+# Combined Analytics Queries
+# ============================================================================
+
+# Query: Dashboard overview - all key metrics
+# [中] 仪表盘概览 - 所有关键指标
+# [EN] Dashboard overview - all key metrics
+query DashboardOverview {
+  # Global stats
+  globalStats(id: "1") {
+    totalPositions
+    activePositions
+    criticalPositions
+    warningPositions
+    safePositions
+    totalProtections
+    successfulProtections
+  }
+
+  # Recent automation events
+  automationEvents(first: 10, orderBy: timestamp, orderDirection: desc) {
+    id
+    position {
+      id
+      userAddress
+    }
+    healthFactor
+    keeper
+    timestamp
+  }
+
+  # Recent protections
+  protectionActions(first: 10, orderBy: timestamp, orderDirection: desc) {
+    id
+    position {
+      id
+      userAddress
+    }
+    actionType
+    healthFactorBefore
+    healthFactorAfter
+    timestamp
+  }
+
+  # Critical positions needing attention
+  positions(where: { healthFactor_lt: 13000, isActive: true }, first: 10, orderBy: healthFactor) {
+    id
+    userAddress
+    healthFactor
+    totalProtections
+    totalAutomationTriggers
+    lastUpdatedAt
+  }
+}
+
+# Query: Automation performance metrics
+# [中] 自动化性能指标
+# [EN] Automation performance metrics
+query AutomationPerformance {
+  # Total automation events
+  automationEvents(first: 1000) {
+    id
+    timestamp
+  }
+
+  # Positions with most automation triggers
+  positions(where: { totalAutomationTriggers_gt: 0 }, first: 10, orderBy: totalAutomationTriggers, orderDirection: desc) {
+    id
+    userAddress
+    healthFactor
+    totalAutomationTriggers
+    totalProtections
+  }
+
+  # Global stats
+  globalStats(id: "1") {
+    totalProtections
+    successfulProtections
+    totalCollateralAddedViaProtection
+  }
+}

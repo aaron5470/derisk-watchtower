@@ -63,3 +63,22 @@
 - 双语文档（英文/中文）便于国际访问
 - Compliance-ready for hackathon submission
 - 为黑客马拉松提交做好合规准备
+## 2025-10-19 (D6 - E3 Chainlink Automation)
+**EN:** Initialize E3 Chainlink Automation branch for automated position protection.
+**中文：** 初始化 E3 Chainlink Automation 分支用于自动化头寸保护。
+
+### Added / 新增
+- Branch 005-derisk-watchtower-automation created from main
+- 从 main 创建分支 005-derisk-watchtower-automation
+- Draft PR opened for early CI/CD validation
+- 开启草稿 PR 以提前进行 CI/CD 验证
+
+### Planned / 计划中
+- AutomationCompatibleInterface implementation in Protector contract
+- Protector 合约中实现 AutomationCompatibleInterface
+- Chainlink Automation Upkeep registration scripts
+- Chainlink Automation Upkeep 注册脚本
+- Backend automation monitoring service
+- 后端自动化监控服务
+- Subgraph automation event indexing
+- 子图自动化事件索引

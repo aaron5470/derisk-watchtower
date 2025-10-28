@@ -1,7 +1,7 @@
 # E1 Contracts Tasks（E1 合约任务）
 
-**Feature**: DeRisk Watchtower | **分支**: `002-derisk-watchtower-real`
-**Feature**: DeRisk 瞭望塔 | **Branch**: `002-derisk-watchtower-real`
+**Feature**: DeRisk Watchtower | **分支**: `003-derisk-watchtower-contracts`
+**Feature**: DeRisk 瞭望塔 | **Branch**: `003-derisk-watchtower-contracts`
 
 ---
 
@@ -899,30 +899,30 @@ Event emitted only if delta > 1% | 仅当差值 > 1% 时发出事件
 
 ## E1.18 Completion Checklist（完成清单）
 
-- [ ] Foundry project initialized with Base Sepolia config | Foundry 项目已初始化 Base Sepolia 配置
-- [ ] OpenZeppelin contracts installed and remapped | OpenZeppelin 合约已安装并重映射
-- [ ] PositionVault contract implements all functions | PositionVault 合约实现所有函数
-- [ ] Protector contract implements protection logic | Protector 合约实现保护逻辑
-- [ ] DemoEscrow contract authorizes protector | DemoEscrow 合约授权 protector
-- [ ] All contracts use ReentrancyGuard | 所有合约使用 ReentrancyGuard
-- [ ] All contracts use Pausable pattern | 所有合约使用 Pausable 模式
-- [ ] Health factor calculation uses 4 decimal precision | 健康系数计算使用 4 位小数精度
-- [ ] Events defined for all state changes | 为所有状态变化定义事件
-- [ ] MockERC20 and MockPriceFeed for testing | 测试用 MockERC20 与 MockPriceFeed
-- [ ] PositionVault.t.sol covers all functions | PositionVault.t.sol 覆盖所有函数
-- [ ] Protector.t.sol tests protection flow | Protector.t.sol 测试保护流程
-- [ ] Integration.t.sol tests full create→protect flow | Integration.t.sol 测试完整创建→保护流程
-- [ ] Gas snapshot baseline established | Gas 快照基线已建立
-- [ ] Reentrancy tests pass | 重入测试通过
-- [ ] Pausable tests pass | 暂停测试通过
-- [ ] Deploy.s.sol deploys all contracts | Deploy.s.sol 部署所有合约
-- [ ] Seed.s.sol creates demo positions | Seed.s.sol 创建演示头寸
-- [ ] Contracts deployed to Base Sepolia | 合约已部署到 Base Sepolia
-- [ ] Deployed addresses saved to JSON | 已部署地址保存到 JSON
-- [ ] NatSpec documentation added to all contracts | 所有合约添加 NatSpec 文档
-- [ ] Forge doc generated successfully | Forge doc 成功生成
-- [ ] All tests pass with forge test | 所有测试通过 forge test
-- [ ] Contract verification on BaseScan completed | BaseScan 合约验证完成
+- [X] Foundry project initialized with Base Sepolia config | Foundry 项目已初始化 Base Sepolia 配置
+- [X] OpenZeppelin contracts installed and remapped | OpenZeppelin 合约已安装并重映射
+- [X] PositionVault contract implements all functions | PositionVault 合约实现所有函数
+- [X] Protector contract implements protection logic | Protector 合约实现保护逻辑
+- [X] DemoEscrow contract authorizes protector | DemoEscrow 合约授权 protector
+- [X] All contracts use ReentrancyGuard | 所有合约使用 ReentrancyGuard
+- [X] All contracts use Pausable pattern | 所有合约使用 Pausable 模式
+- [X] Health factor calculation uses 4 decimal precision | 健康系数计算使用 4 位小数精度
+- [X] Events defined for all state changes | 为所有状态变化定义事件
+- [X] MockERC20 and MockPriceFeed for testing | 测试用 MockERC20 与 MockPriceFeed
+- [X] PositionVault.t.sol covers all functions | PositionVault.t.sol 覆盖所有函数
+- [X] Protector.t.sol tests protection flow | Protector.t.sol 测试保护流程
+- [X] Integration.t.sol tests full create→protect flow | Integration.t.sol 测试完整创建→保护流程
+- [ ] Gas snapshot baseline established | Gas 快照基线已建立 (需要运行 `forge snapshot`)
+- [X] Reentrancy tests implemented | 重入测试已实现
+- [X] Pausable tests implemented | 暂停测试已实现
+- [X] Deploy.s.sol deploys all contracts | Deploy.s.sol 部署所有合约
+- [X] Seed.s.sol creates demo positions | Seed.s.sol 创建演示头寸
+- [ ] Contracts deployed to Base Sepolia | 合约已部署到 Base Sepolia (需要实际部署)
+- [ ] Deployed addresses saved to JSON | 已部署地址保存到 JSON (部署后自动生成)
+- [X] NatSpec documentation added to all contracts | 所有合约添加 NatSpec 文档
+- [ ] Forge doc generated successfully | Forge doc 成功生成 (需要运行 `forge doc`)
+- [ ] All tests pass with forge test | 所有测试通过 forge test (需要安装 Foundry 并运行)
+- [ ] Contract verification on BaseScan completed | BaseScan 合约验证完成 (部署到测试网后验证)
 
 ---
 
