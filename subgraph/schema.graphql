@@ -1,0 +1,187 @@
+# DeRisk Watchtower Subgraph Schema
+# This schema defines the entities for indexing position management and protection events
+
+# Position entity - tracks individual DeFi lending positions
+type Position @entity {
+  id: ID! # positionId (bytes32)
+  user: User! # reference to user entity
+  userAddress: Bytes! # address of position owner
+  collateralToken: Bytes! # address of collateral token
+  collateralAmount: BigInt! # amount of collateral (wei)
+  debtToken: Bytes! # address of debt token
+  debtAmount: BigInt! # amount of debt (wei)
+  healthFactor: BigInt! # current health factor (4 decimal precision, 10000 = 1.0)
+  createdAt: BigInt! # block timestamp
+  createdAtBlock: BigInt! # block number
+  lastUpdatedAt: BigInt! # last update timestamp
+  lastUpdatedAtBlock: BigInt! # last update block number
+  isActive: Boolean! # whether position is still active
+
+  # Relationships
+  riskEvents: [RiskEvent!]! @derivedFrom(field: "position")
+  protectionActions: [ProtectionAction!]! @derivedFrom(field: "position")
+  automationEvents: [AutomationEvent!]! @derivedFrom(field: "position")
+
+  # Aggregated stats
+  totalProtections: BigInt! # total number of protections executed
+  totalCollateralAdded: BigInt! # total collateral added through protections
+  totalAutomationTriggers: BigInt! # total automation triggers for this position
+  lowestHealthFactor: BigInt! # lowest HF ever recorded for this position
+  highestHealthFactor: BigInt! # highest HF ever recorded for this position
+}
+
+# RiskEvent entity - tracks health factor breaches and warnings
+type RiskEvent @entity {
+  id: ID! # positionId-blockNumber-logIndex
+  position: Position! # reference to position
+  eventType: RiskEventType! # type of risk event
+  healthFactor: BigInt! # health factor at time of event
+  collateralAmount: BigInt! # collateral amount at time of event
+  debtAmount: BigInt! # debt amount at time of event
+  timestamp: BigInt! # block timestamp
+  blockNumber: BigInt! # block number
+  transactionHash: Bytes! # transaction hash
+}
+
+# Enum for risk event types
+enum RiskEventType {
+  CRITICAL # HF < 1.3 (13000)
+  WARNING # HF between 1.3 and 1.5
+  RECOVERED # HF returned to safe level (> 1.5)
+  LIQUIDATION_RISK # HF approaching liquidation threshold
+}
+
+# ProtectionAction entity - tracks executed protections
+type ProtectionAction @entity {
+  id: ID! # transactionHash-logIndex
+  position: Position! # reference to position
+  actionType: ProtectionActionType! # type of protection action
+  collateralAdded: BigInt! # amount of collateral added (wei)
+  healthFactorBefore: BigInt! # HF before protection
+  healthFactorAfter: BigInt! # HF after protection
+  protector: Bytes! # address of protector contract
+  timestamp: BigInt! # block timestamp
+  blockNumber: BigInt! # block number
+  transactionHash: Bytes! # transaction hash
+  gasUsed: BigInt! # gas used for protection
+}
+
+# Enum for protection action types
+enum ProtectionActionType {
+  COLLATERAL_ADDED # Collateral added from escrow
+  MANUAL_PROTECTION # Manual protection triggered
+  AUTOMATED_PROTECTION # Automated protection via Chainlink
+  EMERGENCY_PROTECTION # Emergency protection action
+}
+
+# GlobalStats entity - aggregated statistics across all positions
+type GlobalStats @entity {
+  id: ID! # singleton entity with id "1"
+
+  # Position counts
+  totalPositions: BigInt! # total positions created
+  activePositions: BigInt! # currently active positions
+  criticalPositions: BigInt! # positions with HF < 1.3
+  warningPositions: BigInt! # positions with HF between 1.3-1.5
+  safePositions: BigInt! # positions with HF > 1.5
+
+  # Protection stats
+  totalProtections: BigInt! # total protections executed
+  totalCollateralAddedViaProtection: BigInt! # total collateral added through protections
+  successfulProtections: BigInt! # protections that improved HF
+
+  # Risk event stats
+  totalRiskEvents: BigInt! # total risk events recorded
+  totalCriticalEvents: BigInt! # total critical HF events
+  totalWarningEvents: BigInt! # total warning HF events
+
+  # Volume stats
+  totalCollateralDeposited: BigInt! # cumulative collateral deposited
+  totalDebtTaken: BigInt! # cumulative debt taken
+
+  # Time tracking
+  lastUpdatedAt: BigInt! # last update timestamp
+  lastUpdatedAtBlock: BigInt! # last update block number
+}
+
+# User entity - tracks per-user aggregated data
+type User @entity {
+  id: ID! # user address
+  address: Bytes! # user address
+
+  # Position tracking
+  positions: [Position!]! @derivedFrom(field: "user")
+  totalPositions: BigInt! # total positions created by user
+  activePositions: BigInt! # currently active positions
+
+  # Protection stats
+  totalProtectionsReceived: BigInt! # total protections on user's positions
+  totalCollateralAddedViaProtection: BigInt! # total collateral added to user's positions
+
+  # Risk tracking
+  currentCriticalPositions: BigInt! # current positions with HF < 1.3
+  currentWarningPositions: BigInt! # current positions with HF 1.3-1.5
+  currentSafePositions: BigInt! # current positions with HF > 1.5
+
+  # Time tracking
+  firstPositionAt: BigInt! # timestamp of first position
+  lastActivityAt: BigInt! # timestamp of last activity
+}
+
+# DailyStats entity - time-series statistics for analytics
+type DailyStats @entity {
+  id: ID! # date in format YYYY-MM-DD
+  date: Int! # unix timestamp (start of day)
+
+  # Daily activity counts
+  newPositions: BigInt! # positions created this day
+  protectionsExecuted: BigInt! # protections executed this day
+  riskEventsTriggered: BigInt! # risk events triggered this day
+
+  # Daily volumes
+  collateralDeposited: BigInt! # collateral deposited this day
+  debtTaken: BigInt! # debt taken this day
+  collateralAddedViaProtection: BigInt! # collateral added via protection
+
+  # Snapshot stats (end of day)
+  totalActivePositions: BigInt! # active positions at end of day
+  criticalPositionsCount: BigInt! # critical positions at end of day
+  warningPositionsCount: BigInt! # warning positions at end of day
+  averageHealthFactor: BigInt! # average HF of all active positions
+
+  # Gas stats
+  totalGasUsed: BigInt! # total gas used this day
+  averageGasPerProtection: BigInt! # average gas per protection
+}
+
+# Token entity - tracks supported tokens
+type Token @entity {
+  id: ID! # token address
+  address: Bytes! # token address
+  symbol: String! # token symbol (e.g., "WETH", "USDC")
+  name: String! # token name
+  decimals: Int! # token decimals
+
+  # Usage stats
+  totalCollateralVolume: BigInt! # total used as collateral
+  totalDebtVolume: BigInt! # total used as debt
+  positionCount: BigInt! # number of positions using this token
+
+  # Time tracking
+  firstSeenAt: BigInt! # first usage timestamp
+  lastSeenAt: BigInt! # last usage timestamp
+}
+
+# AutomationEvent entity - tracks Chainlink Automation triggers
+type AutomationEvent @entity {
+  id: ID! # transactionHash-logIndex
+  position: Position! # reference to position that was protected
+  healthFactor: BigInt! # health factor at time of automation trigger
+  keeper: Bytes! # address of Chainlink Automation keeper
+  timestamp: BigInt! # block timestamp
+  blockNumber: BigInt! # block number
+  txHash: Bytes! # transaction hash
+
+  # Relationships
+  protectionAction: ProtectionAction # reference to protection action (if executed)
+}

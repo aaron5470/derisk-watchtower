@@ -1,0 +1,94 @@
+{
+  "scenario": "healthy-positions",
+  "description": "Scenario with healthy lending positions",
+  "positions": [
+    {
+      "id": "0x1234567890abcdef1234567890abcdef12345678",
+      "owner": "0xabcdef1234567890abcdef1234567890abcdef12",
+      "collateral_amount": "5000000000000000000",
+      "debt_amount": "2000000000000000000000",
+      "health_factor": 2.5,
+      "last_update_at": 1704067200
+    },
+    {
+      "id": "0x2345678901bcdef12345678901bcdef123456789",
+      "owner": "0xbcdef12345678901bcdef12345678901bcdef123",
+      "collateral_amount": "3000000000000000000",
+      "debt_amount": "1500000000000000000000",
+      "health_factor": 2.0,
+      "last_update_at": 1704067200
+    },
+    {
+      "id": "0x3456789012cdef123456789012cdef1234567890",
+      "owner": "0xcdef123456789012cdef123456789012cdef1234",
+      "collateral_amount": "2000000000000000000",
+      "debt_amount": "1200000000000000000000",
+      "health_factor": 1.67,
+      "last_update_at": 1704067200
+    }
+  ],
+  "events": [
+    {
+      "id": "evt_001",
+      "position_id": "0x1234567890abcdef1234567890abcdef12345678",
+      "event_type": "position_update",
+      "health_factor": 2.5,
+      "threshold": 1.5,
+      "timestamp": 1704067200,
+      "replayed": true,
+      "tx_hash": "0xabc123def456789abc123def456789abc123def456789abc123def456789abc123"
+    },
+    {
+      "id": "evt_002",
+      "position_id": "0x2345678901bcdef12345678901bcdef123456789",
+      "event_type": "position_update",
+      "health_factor": 2.0,
+      "threshold": 1.5,
+      "timestamp": 1704067260,
+      "replayed": true,
+      "tx_hash": "0xdef456789abc123def456789abc123def456789abc123def456789abc123def456"
+    },
+    {
+      "id": "evt_003",
+      "position_id": "0x3456789012cdef123456789012cdef1234567890",
+      "event_type": "position_update",
+      "health_factor": 1.67,
+      "threshold": 1.5,
+      "timestamp": 1704067320,
+      "replayed": true,
+      "tx_hash": "0x789abc123def456789abc123def456789abc123def456789abc123def456789abc"
+    }
+  ],
+  "websocket_messages": [
+    {
+      "timestamp": 1704067380,
+      "message": {
+        "position_id": "0x1234567890abcdef1234567890abcdef12345678",
+        "health_factor": 2.4,
+        "threshold": 1.5,
+        "timestamp": 1704067380,
+        "severity": "info"
+      }
+    },
+    {
+      "timestamp": 1704067440,
+      "message": {
+        "position_id": "0x2345678901bcdef12345678901bcdef123456789",
+        "health_factor": 1.9,
+        "threshold": 1.5,
+        "timestamp": 1704067440,
+        "severity": "info"
+      }
+    },
+    {
+      "timestamp": 1704067500,
+      "message": {
+        "position_id": "0x3456789012cdef123456789012cdef1234567890",
+        "health_factor": 1.6,
+        "threshold": 1.5,
+        "timestamp": 1704067500,
+        "severity": "info"
+      }
+    }
+  ]
+}
