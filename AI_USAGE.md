@@ -48,6 +48,8 @@ Every file/commit assisted by AI is registered here: path, AI tool, purpose, hum
 2025-01-19 | Claude | frontend/hooks/* | owner=ai review=wukai | Implemented custom hooks for positions, protection, and WebSocket connections
 2025-01-19 | Claude | frontend/lib/* | owner=ai review=wukai | Created utility libraries for API, contracts, providers, and Web3 configuration
 2025-01-19 | Claude | backend/internal/api/handlers/riskevents.go | owner=ai review=wukai | Added risk events API handler for frontend integration
+2025-01-19 | Claude | backend/go.mod | owner=ai review=wukai | Fixed Go version from 1.24.3 to 1.21 for CI/CD compatibility
+2025-01-19 | Claude | frontend/package.json | owner=ai review=wukai | Added missing type-check script for CI/CD pipeline
 2025-01-19 | Claude | branch 008-derisk-watchtower-observability | owner=ai review=wukai | Created E6 Observability branch from 007 branch for monitoring and metrics implementation
 2025-01-19 | Claude | backend/contracts/abis/* | owner=ai review=wukai | Added contract ABI files for frontend Web3 integration
 2025-10-28 | Claude | contracts/src/Protector.sol | owner=ai review=wukai | AI-assisted modifications
