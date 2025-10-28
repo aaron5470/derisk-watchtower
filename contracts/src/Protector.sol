@@ -40,6 +40,7 @@ interface IDemoEscrow {
 /// @title Protector
 /// @notice Executes protection strategies for at-risk DeFi positions
 /// @dev Adds collateral from escrow to improve position health factors
+/// @dev [owner=ai] [review=WK] [tool=Claude] [date=2025-10-16] [scope=file] [notes=init events]
 contract Protector is ReentrancyGuard, IAutomationCompatible {
     using SafeERC20 for IERC20;
 

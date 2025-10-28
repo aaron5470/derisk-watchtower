@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @title PositionVault
 /// @notice Manages DeFi lending positions with health factor tracking
 /// @dev Uses OpenZeppelin ReentrancyGuard and Pausable for security
+/// @dev [owner=ai] [review=WK] [tool=Claude] [date=2025-10-16] [scope=file] [notes=init events]
 contract PositionVault is ReentrancyGuard, Pausable, Ownable {
     /// @notice Position structure representing a lending position
     struct Position {

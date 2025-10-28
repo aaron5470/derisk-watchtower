@@ -135,6 +135,40 @@ forge test --match-contract ProtectorAutomationTest -vv
 
 ---
 
+## Observability / 可观测性
+
+DeRisk Watchtower includes a complete observability stack with Prometheus and Grafana.
+
+### Quick Start / 快速开始
+
+```bash
+./scripts/start-observability.sh
+```
+
+Or on Windows / 或在 Windows 上:
+```powershell
+.\scripts\start-observability.ps1
+```
+
+### Access / 访问
+
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3001 (admin/admin)
+
+### Metrics / 指标
+
+- `risk_event_trigger_total` - Total risk events / 总风险事件
+- `protect_success_total` - Successful protections / 成功保护次数
+- `protect_failure_total` - Failed protections / 失败保护次数
+- `alert_latency_seconds` - Alert latency histogram / 告警延迟直方图
+- `positions_monitored` - Active position count / 活跃仓位数量
+
+See [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md) for detailed documentation.
+
+详细文档见 [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md)。
+
+---
+
 ## Getting Started / 快速开始
 
 ### Prerequisites / 前置要求

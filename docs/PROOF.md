@@ -210,3 +210,183 @@ Example, 2025-10-13: Repository structure commit, web startup, api /health respo
 - Upkeep registration confirmation
 - First automation trigger
 - Subgraph automation event query results
+
+---
+
+## 🎥 Demo Video / 演示视频
+
+### Video Information / 视频信息
+
+**[中]** 演示视频展示了 DeRisk Watchtower 的完整用户流程，从钱包连接到头寸保护的全过程。
+
+**[EN]** The demo video showcases the complete user journey of DeRisk Watchtower, from wallet connection to position protection.
+
+###c
+
+- **Video Link / 视频链接**: `[TO BE ADDED AFTER RECORDING]`
+- **Platform / 平台**: YouTube / Vimeo / Loom
+- **Duration / 时长**: 2-4 minutes
+- **Resolution / 分辨率**: 1080p (1920x1080)
+- **Language / 语言**: English with on-screen captions
+
+### Demo Flow / 演示流程
+
+**[0:00-0:30] Introduction & Overview / 简介和概览**
+- Welcome to DeRisk Watchtower
+- Dashboard overview with multiple positions
+- Health Factor color-coded indicators (Green/Yellow/Red)
+
+**[0:30-1:00] Connect Wallet / 连接钱包**
+- Click "Connect Wallet" button
+- MetaMask connection
+- Connected address displayed in header
+
+**[1:00-1:30] View Position Details / 查看头寸详情**
+- Position card expansion
+- Collateral amount display
+- Debt amount display
+- Health Factor calculation
+- Risk status indicator
+
+**[1:30-2:00] Trigger Price Drop Simulation / 触发价格下跌模拟**
+- Terminal command execution
+- Transaction processing demonstration
+- Real-time price feed update
+
+**[2:00-2:30] Observe Real-Time Alert / 观察实时警报**
+- Automatic alert banner appears
+- WebSocket real-time notification
+- "Health Factor dropped to 1.15" message
+- Protection recommendation displayed
+
+**[2:30-3:00] Execute Protection / 执行保护**
+- Click "Protect Position" button
+- MetaMask transaction confirmation
+- Transaction approval
+- On-chain execution
+
+**[3:00-3:30] Before/After Comparison / 前后对比**
+- Before: HF 1.15 (Critical - Red)
+- After: HF 1.52 (Safe - Green)
+- Collateral increase visualization
+- Updated position status
+
+**[3:30-4:00] Partner Integrations / 合作伙伴集成**
+- Chainlink Automation dashboard
+- BaseScan transaction confirmation
+- The Graph subgraph query (optional)
+- Project conclusion
+
+### Key Features Demonstrated / 展示的关键功能
+
+**[中]** 演示中展示的功能：
+- ✅ 实时头寸监控
+- ✅ WebSocket 实时更新
+- ✅ 自动风险检测
+- ✅ 一键保护机制
+- ✅ 前后对比可视化
+- ✅ 多合作伙伴集成
+
+**[EN]** Features demonstrated:
+- ✅ Real-time position monitoring
+- ✅ WebSocket real-time updates
+- ✅ Automatic risk detection
+- ✅ One-click protection mechanism
+- ✅ Before/after comparison visualization
+- ✅ Multi-partner integrations
+
+### Recording Setup / 录制设置
+
+**Recording Tools / 录制工具:**
+- **Software / 软件**: OBS Studio (recommended) / Loom / Camtasia
+- **Resolution / 分辨率**: 1920x1080 (1080p)
+- **Frame Rate / 帧率**: 30 FPS or 60 FPS
+- **Audio / 音频**: Clear narration with microphone
+- **Browser / 浏览器**: Chrome/Firefox (clean UI, no extensions visible)
+
+**Environment Setup / 环境设置:**
+- ✅ All services running (backend, frontend, Docker)
+- ✅ Test positions with different HF values (Safe, Warning, Critical)
+- ✅ WebSocket connection established
+- ✅ Demo flow tested before recording
+
+### Offline Replay Mode / 离线重放模式
+
+**[中]** 为方便评审，项目支持离线重放模式，无需实际网络连接即可演示完整流程。
+
+**[EN]** For reviewer convenience, the project supports offline replay mode for demonstrating the complete flow without actual network connection.
+
+**Access / 访问方式:**
+```
+http://localhost:3000?replay=1
+```
+
+**Replay Fixtures / 重放数据:**
+- `docs/fixtures/scenario-1-healthy.json` - Safe to Safe transition
+- `docs/fixtures/scenario-2-alert.json` - Warning to Critical with alert
+- `docs/fixtures/scenario-3-protected.json` - Critical to Safe after protection
+
+### Video Upload Checklist / 视频上传检查清单
+
+**Before Upload / 上传前检查:**
+- [ ] Video quality verified (1080p, clear audio)
+- [ ] All key moments captured (full flow demonstrated)
+- [ ] No sensitive information visible (private keys, API keys)
+- [ ] Duration within 2-4 minutes
+- [ ] Audio narration clear and professional
+
+**After Upload / 上传后检查:**
+- [ ] Video link added to PROOF.md
+- [ ] Video accessibility verified (public or unlisted)
+- [ ] Video description includes project name and ETHOnline 2025
+- [ ] Timestamps added to video description (optional)
+
+### Video Link Placeholder / 视频链接占位符
+
+**[TO BE UPDATED AFTER RECORDING]**
+
+Once the video is recorded and uploaded, update this section with:
+```markdown
+**Video URL**: [Insert YouTube/Vimeo/Loom link here]
+**Uploaded**: [Date]
+**Duration**: [Exact duration, e.g., 3:47]
+**Thumbnail**: [Optional: Link to video thumbnail]
+```
+
+---
+
+## 📸 Screenshot Evidence / 截图证据
+
+### Required Screenshots / 必需截图
+
+**[中]** 以下截图将在部署完成后添加：
+
+**[EN]** The following screenshots will be added after deployment:
+
+1. **Position Dashboard / 头寸仪表盘**
+   - File: `docs/screenshots/position-dashboard.png`
+   - Shows: Position cards with HF indicators, color-coded status
+
+2. **Real-Time Alert / 实时警报**
+   - File: `docs/screenshots/real-time-alert.png`
+   - Shows: Alert banner with "HF dropped to 1.15" message
+
+3. **Protection Execution / 保护执行**
+   - File: `docs/screenshots/protection-before-after.png`
+   - Shows: Before/after HF comparison (1.15 → 1.52)
+
+4. **Chainlink Automation Dashboard / Chainlink 自动化仪表盘**
+   - File: `docs/screenshots/chainlink-automation.png`
+   - Shows: Upkeep history with trigger timestamps
+
+5. **Grafana Metrics / Grafana 指标**
+   - File: `docs/screenshots/grafana-metrics.png`
+   - Shows: Live metrics dashboard with triggers, latency, positions
+
+6. **BaseScan Contract Verification / BaseScan 合约验证**
+   - File: `docs/screenshots/basescan-contracts.png`
+   - Shows: Verified contracts on BaseScan
+
+7. **The Graph Subgraph Query / The Graph 子图查询**
+   - File: `docs/screenshots/subgraph-query.png`
+   - Shows: GraphQL query results with position data

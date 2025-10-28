@@ -2,8 +2,23 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
+rule_files:
+  - "rules.yml"
+  - "alerts.yml"
+
 scrape_configs:
-  - job_name: 'derisk-watchtower-api'
+  - job_name: 'watchtower-api'
     static_configs:
       - targets: ['host.docker.internal:8080']
     metrics_path: '/metrics'
+    scrape_interval: 5s
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'test-data-generator'
+    static_configs:
+      - targets: ['host.docker.internal:8082']
+    metrics_path: '/metrics'
+    scrape_interval: 5s

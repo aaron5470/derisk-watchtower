@@ -1,0 +1,29 @@
+groups:
+  - name: watchtower_alerts
+    interval: 30s
+    rules:
+      - alert: HighAlertLatency
+        expr: watchtower:alert_latency:p95 > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High alert latency detected"
+          description: "P95 alert latency is {{ $value }}s (threshold: 10s)"
+
+      - alert: ProtectionFailureRate
+        expr: watchtower:protection:success_rate < 0.9
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High protection failure rate"
+          description: "Protection success rate is {{ $value }} (threshold: 0.9)"
+
+      - alert: APIDown
+        expr: up{job="watchtower-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Watchtower API is down"

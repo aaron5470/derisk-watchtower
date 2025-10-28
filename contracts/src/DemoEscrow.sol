@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @title DemoEscrow
 /// @notice Simple escrow contract for holding collateral used in protection operations
 /// @dev FOR TESTNET DEMONSTRATION ONLY - Not audited for production use
+/// @dev [owner=ai] [review=WK] [tool=Claude] [date=2025-10-16] [scope=file] [notes=init events]
 contract DemoEscrow is Ownable {
     using SafeERC20 for IERC20;
 
